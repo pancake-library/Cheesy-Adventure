@@ -1,2 +1,2 @@
-# Cheesey-Adventure
-A game for the Jamcraft %
+# Cheesy Adventure
+ A game for the Jamcraft 2020
