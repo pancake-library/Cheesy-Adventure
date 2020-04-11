@@ -447,10 +447,10 @@ function pancake.addForce(object, force) --force is a table of strength; x and y
 	return force
 end
 
-function pancake.addTimer(time, mode, func) --TIME IS IN MS! Mode can be repetetive or single. If single is pick timer will run once and execute func function once, then delete itself. Repetitive basically acts like a timed loop executing func every x seconds
+function pancake.addTimer(time, mode, func, arguments) --TIME IS IN MS! Mode can be repetetive or single. If single is pick timer will run once and execute func function once, then delete itself. Repetitive basically acts like a timed loop executing func every x seconds
 	local time = time or 1000
 	local mode = mode or "single"
-	local timer = pancake.assignID({duration = time, time = 0, mode = mode, func = func})
+	local timer = pancake.assignID({duration = time, time = 0, mode = mode, func = func, arguments = arguments})
 	pancake.timers[#pancake.timers + 1] = timer
 	return timer
 end
@@ -937,7 +937,7 @@ function updateTimers(dt)
 			timer.time = timer.time + dt*1000
 			if timer.time >= timer.duration then
 				if timer.func then
-					timer.func()
+					timer.func(timer.arguments)
 				end
 				if timer.mode == "single" then
 					deleteThese[#deleteThese + 1] = timer.ID
@@ -1220,6 +1220,18 @@ function pancake.mousepressed(x, y, button)
 	pancake.checkButtonPresses(x,y,button)
 	--switching target (in debug mode)
 	switchTarget(x,y, true)
+end
+
+function pancake.keypressed(key)
+	local buttons = pancake.buttons
+	if buttons[1] then
+		for i = 1, #buttons do
+			local button = buttons[i]
+			if button.key == key and button.func then
+				button.func()
+			end
+		end
+	end
 end
 
 function switchTarget(x,y, lock)
