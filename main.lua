@@ -46,6 +46,7 @@ function loadAssets()
 	pancake.addImage("fuel", "images")
 	pancake.addImage("fuel_ui", "images")
 	pancake.addImage("earth", "images")
+	pancake.addImage("pizza_titleScreen", "images")
 	--sounds
 	pancake.addSound("laser")
 	pancake.addSound("success")
