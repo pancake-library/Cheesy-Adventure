@@ -929,7 +929,6 @@ function pancake.opposite(value)
 end
 
 function updateTimers(dt)
-	local deleteThese = {}
 	local timers = pancake.timers
 	if timers[1] then
 		for i = 1, #timers do
@@ -940,15 +939,10 @@ function updateTimers(dt)
 					timer.func(timer.arguments)
 				end
 				if timer.mode == "single" then
-					deleteThese[#deleteThese + 1] = timer.ID
+					pancake.trash(pancake.timers, timer.ID, "ID")
 				elseif timer.mode == "repetetive" then
 					timer.time = timer.time - timer.duration
 				end
-			end
-		end
-		if deleteThese[1] then
-			for i = 1, #deleteThese do
-				pancake.smartDelete(timers, deleteThese[i], "ID")
 			end
 		end
 	end
