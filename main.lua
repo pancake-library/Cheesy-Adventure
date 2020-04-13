@@ -4,7 +4,7 @@ function love.load()
 	pancake.init({window = {pixelSize = love.graphics.getHeight()/96, width = 96, height = 96}}) --Initiating pancake and setting pixelSize, so that the pancake display will be the height of the window! pixelSize is how many pixels every pancake pixel should take
 	pancake.loadAnimation = nil
 	pancake.paused = false
-	pancake.debugMode = true
+	--pancake.debugMode = true
 	loadAssets()
 	loadLevel(1)
 	pancake.background.image = pancake.images.background
@@ -20,7 +20,7 @@ function loadLevel(level)
 		loadShipLevel()
 		pancake.addObject({image = "earth", x = 1020, y = 43, width = 1, height = 1, layer = 2})
 		pancake.paused = true
-		text = 1
+		text = 0
 	end
 end
 
@@ -81,13 +81,14 @@ function decreaseFuel()
 end
 
 function centerPressed()
-	if levelType == "ship" then
-		if text == nil then
+	if levelType == "ship" and text == nil then
 			shoot()
-		else
-			text = nil
-			pancake.paused = false
-		end
+	end
+	if text == 1 then
+		text = nil
+		pancake.paused = false
+	elseif text == 0 then
+		text = 1
 	end
 end
 
@@ -181,6 +182,9 @@ function drawText()
 		love.graphics.setColor(1,1,1,1)
 		if text == 1 then
 			pancake.print("Chapter 1", x+16*scale, y + 26*scale, scale*2)
+			pancake.print("Through the galaxy", x+16*scale, y + 50*scale, scale)
+		elseif text == 0 then
+			pancake.print("Introduction", x+16*scale, y + 26*scale, scale*2)
 			pancake.print("Through the galaxy", x+16*scale, y + 50*scale, scale)
 		end
 	end
