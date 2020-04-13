@@ -84,11 +84,13 @@ function centerPressed()
 	if levelType == "ship" and text == nil then
 			shoot()
 	end
-	if text == 1 then
+	if text == 2 then
 		text = nil
 		pancake.paused = false
 	elseif text == 0 then
 		text = 1
+	elseif text == 1 then
+		text = 2
 	end
 end
 
@@ -180,12 +182,35 @@ function drawText()
 		love.graphics.setColor(0,0,0,1)
 		love.graphics.rectangle("fill", pancake.window.x , pancake.window.y , 96*scale, 96*scale)
 		love.graphics.setColor(1,1,1,1)
-		if text == 1 then
+		if text == 2 then
 			pancake.print("Chapter 1", x+16*scale, y + 26*scale, scale*2)
 			pancake.print("Through the galaxy", x+16*scale, y + 50*scale, scale)
 		elseif text == 0 then
-			pancake.print("Introduction", x+16*scale, y + 26*scale, scale*2)
-			pancake.print("Through the galaxy", x+16*scale, y + 50*scale, scale)
+			pancake.print("Introduction", x+23*scale, y + 6*scale, scale)
+			pancake.print("A long time ago in a galaxy", x+4*scale, y + 16*scale, scale)
+			pancake.print("far,far away... there was a ", x+scale, y + 23*scale, scale)
+			pancake.print("family named Hutt. It was", x+scale, y + 30*scale, scale)
+			pancake.print("one of the richest families", x+scale, y + 37*scale, scale)
+			pancake.print("because they were known", x+scale, y + 44*scale, scale)
+			pancake.print("for their best restaurant", x+scale, y + 51*scale, scale)
+			pancake.print("in the universe that was", x+scale, y + 58*scale, scale)
+			pancake.print("selling pizza: Pizza Hutt.", x+scale, y + 65*scale, scale)
+			pancake.print("Vesuvius Hutt, the owner", x+scale, y + 72*scale, scale)
+			pancake.print("of the restaurant, was the", x+scale, y + 79*scale, scale)
+			pancake.print("only known person who", x+scale, y + 86*scale, scale)
+		elseif text == 1 then
+			pancake.print("1", x+23*scale, y + 6*scale, scale)
+			pancake.print("2", x+4*scale, y + 16*scale, scale)
+			pancake.print("3", x+scale, y + 23*scale, scale)
+			pancake.print("4", x+scale, y + 30*scale, scale)
+			pancake.print("5", x+scale, y + 37*scale, scale)
+			pancake.print("6", x+scale, y + 44*scale, scale)
+			pancake.print("7", x+scale, y + 51*scale, scale)
+			pancake.print("8", x+scale, y + 58*scale, scale)
+			pancake.print("9", x+scale, y + 65*scale, scale)
+			pancake.print("10", x+scale, y + 72*scale, scale)
+			pancake.print("11", x+scale, y + 79*scale, scale)
+			pancake.print("12", x+scale, y + 86*scale, scale)
 		end
 	end
 end
