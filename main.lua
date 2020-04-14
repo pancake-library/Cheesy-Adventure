@@ -8,8 +8,7 @@ function love.load()
 	--pancake.debugMode = true
 	loadAssets()
 	level = 1
-	--loadLevel(level)
-	loadGroundLevel()
+	loadLevel(level)
 	pancake.background.image = pancake.images.background
 	left = pancake.addButton({key = "a", name="left",x = 1*pancake.window.pixelSize, y = love.graphics.getHeight()-16*pancake.window.pixelSize, width = 14, height = 14, scale = pancake.window.pixelSize})
 	right = pancake.addButton({key = "d", name="right",x = 17*pancake.window.pixelSize, y = love.graphics.getHeight()-16*pancake.window.pixelSize, width = 14, height = 14, scale = pancake.window.pixelSize})
@@ -19,11 +18,15 @@ function love.load()
 end
 
 function loadLevel(level)
+	level = level
 	if level == 1 then
 		loadShipLevel()
 		pancake.addObject({image = "earth", x = 1990, y = 43, width = 10, height = 10, layer = 2, name = "earth"})
 		pancake.paused = true
 		text = 0
+	elseif level == 2 then
+		loadGroundLevel()
+		pancake.paused = false
 	end
 end
 
@@ -139,6 +142,9 @@ function centerPressed()
 	elseif text == 4 then
 		text = 5
 		chapter2:play()
+	elseif text == 5 then
+		text = nil
+		loadLevel(2)
 	end
 end
 
