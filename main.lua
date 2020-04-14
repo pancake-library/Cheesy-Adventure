@@ -8,7 +8,8 @@ function love.load()
 	--pancake.debugMode = true
 	loadAssets()
 	level = 1
-	loadLevel(level)
+	--loadLevel(level)
+	loadGroundLevel()
 	pancake.background.image = pancake.images.background
 	left = pancake.addButton({key = "a", name="left",x = 1*pancake.window.pixelSize, y = love.graphics.getHeight()-16*pancake.window.pixelSize, width = 14, height = 14, scale = pancake.window.pixelSize})
 	right = pancake.addButton({key = "d", name="right",x = 17*pancake.window.pixelSize, y = love.graphics.getHeight()-16*pancake.window.pixelSize, width = 14, height = 14, scale = pancake.window.pixelSize})
@@ -20,13 +21,18 @@ end
 function loadLevel(level)
 	if level == 1 then
 		loadShipLevel()
-		pancake.addObject({image = "earth", x = 1990, y = 43, width = 1, height = 1, layer = 2})
+		pancake.addObject({image = "earth", x = 1990, y = 43, width = 10, height = 10, layer = 2, name = "earth"})
 		pancake.paused = true
 		text = 0
 	end
 end
 
 function loadAssets()
+	--animations
+	pancake.addAnimation("ship","idle","images/animations",180)
+	pancake.addAnimation("ship","crash","images/animations",250)
+	pancake.addAnimation("alien","idle","images/animations",180)
+	pancake.addAnimation("alien","run","images/animations",150)
 	--Adding buttons
 	pancake.addImage("right", "images/ui")
 	pancake.addImage("right_clicked", "images/ui")
@@ -49,6 +55,7 @@ function loadAssets()
 	pancake.addImage("fuel_ui", "images")
 	pancake.addImage("earth", "images")
 	pancake.addImage("pizza", "images")
+	pancake.addImage("ground", "images")
 	--sounds
 	pancake.addSound("laser")
 	pancake.addSound("success")
@@ -58,7 +65,23 @@ function loadAssets()
 	--music
 	chapter1 = love.audio.newSource("music/chapter1.ogg", "stream")
 	chapter1:setLooping(true)
-	chapter1:setVolume(2.2)
+	chapter1:setVolume(2)
+	chapter2 = love.audio.newSource("music/chapter2.ogg", "stream")
+	chapter2:setLooping(true)
+	chapter2:setVolume(2.6)
+end
+
+function loadGroundLevel()
+	levelType = "ground"
+	pancake.physics.gravityY = 0.2*pancake.physics.gravityY
+	alien = pancake.applyPhysics(pancake.addObject({name = "alien", x = 40, y = 40, width = 5, height = 9, offsetX = -5, offsetY = -5, colliding = true}))
+	pancake.changeAnimation(alien, "idle")
+	pancake.cameraFollow = alien
+	for x = 0, 10 do
+		for y = 0, 5 do
+			pancake.addObject({name = "ground", image = "ground", x = x*8, y = 80 + y*8, width = 8, height = 8, colliding = true})
+		end
+	end
 end
 
 function loadShipLevel(level)--level is a number of the level. This function loads everything that is needed for the ship levels
@@ -66,8 +89,6 @@ function loadShipLevel(level)--level is a number of the level. This function loa
 	pancake.timers = {}
 	pancake.physics.gravityY = 0
 	ship = pancake.applyPhysics(pancake.addObject({name = "ship", x = 0, y = 64, width = 14, height = 7, offsetX = -1, offsetY = -4}))
-	pancake.addAnimation("ship","idle","images/animations",180)
-	pancake.addAnimation("ship","crash","images/animations",250)
 	pancake.changeAnimation(ship,"idle")
 	levelType = "ship"-- This variable indicates what type of level are we in!
 	pancake.cameraFollow = ship
@@ -94,10 +115,14 @@ end
 
 function centerPressed()
 	if levelType == "ship" and text == nil then
-			shoot()
-			if ship.dead then
-				loadLevel(level)
+		shoot()
+		if ship.dead then
+			loadLevel(level)
+			if level == 1 then
+				text = nil
+				pancake.paused = false
 			end
+		end
 	end
 	if text == 2 then
 		text = nil
@@ -111,6 +136,9 @@ function centerPressed()
 	elseif text == 3 then
 		text = 2
 		chapter1:play()
+	elseif text == 4 then
+		text = 5
+		chapter2:play()
 	end
 end
 
@@ -175,6 +203,15 @@ function pancake.onOverlap(object1, object2, dt) -- This function will be called
 		ship.fuel = 11
 		pancake.trash(pancake.objects, object2.ID, "ID")
 		pancake.playSound("success")
+	elseif object1.name == "ship" and object2.name == "earth" then
+		pancake.timers = {}
+		pancake.objects = {}
+		text = 4
+		if chapter1 then
+			chapter1:pause()
+			chapter1 = nil
+		end
+		pancake.paused = true
 	end
 end
 
@@ -242,25 +279,44 @@ function drawText()
 			pancake.print("of planets over a long", x+10*scale, y + 75*scale, scale)
 			pancake.print("period of time.", x+20*scale, y + 82*scale, scale)
 		elseif text == 3 then
-			pancake.print("However, Mr. Hutt died", x+8*scale, y + 11*scale, scale)
-			pancake.print("many years ago and the", x+8*scale, y + 18*scale, scale)
-			pancake.print("only thing he left was a", x+7*scale, y + 25*scale, scale)
-			pancake.print("legend that somewhere in", x+4*scale, y + 32*scale, scale)
-			pancake.print("the universe, the last", x+10*scale, y + 39*scale, scale)
-			pancake.print("cheese planet is still", x+11*scale, y + 46*scale, scale)
-			pancake.print("existing with all the", x+12*scale, y + 53*scale, scale)
-			pancake.print("knowledge and only", x+13*scale, y + 60*scale, scale)
-			pancake.print("possibility to recover", x+10*scale, y + 67*scale, scale)
-			pancake.print("cheese recipe!", x+22*scale, y + 74*scale, scale)
+			pancake.print("However, Mr. Hutt died", x+8*scale, y + 3*scale, scale)
+			pancake.print("many years ago and the", x+8*scale, y + 10*scale, scale)
+			pancake.print("only thing he left was a", x+7*scale, y + 17*scale, scale)
+			pancake.print("legend that somewhere in", x+4*scale, y + 24*scale, scale)
+			pancake.print("the universe, the last", x+10*scale, y + 31*scale, scale)
+			pancake.print("cheese planet is still", x+11*scale, y + 38*scale, scale)
+			pancake.print("existing with all the", x+12*scale, y + 45*scale, scale)
+			pancake.print("knowledge and only", x+13*scale, y + 52*scale, scale)
+			pancake.print("possibility to recover", x+10*scale, y + 59*scale, scale)
+			pancake.print("cheese recipe!", x+22*scale, y + 66*scale, scale)
+			pancake.print("THIS PLANET IS             ...", x+2*scale, y + 83*scale, scale)
+			love.graphics.setColor(0, 1, 0, 1)
+			pancake.print("EARTH", x+65*scale, y + 83*scale, scale)
+		elseif text == 4 then
+			pancake.print("I think... I think this might", x+2*scale, y + 11*scale, scale)
+			pancake.print("be it -said our hero- I have", x+1*scale, y + 18*scale, scale)
+			pancake.print("to check if this is really", x+7*scale, y + 25*scale, scale)
+			love.graphics.setColor(0, 1, 0, 1)
+			pancake.print("EARTH.", x+36*scale, y + 32*scale, scale)
+			love.graphics.setColor(1, 1, 1, 1)
+			pancake.print("And so the alien landed on", x+3*scale, y + 42*scale, scale)
+			pancake.print("the moon...", x+32*scale, y + 49*scale, scale)
+			pancake.print("Little did he know, he was", x+4*scale, y + 56*scale, scale)
+			pancake.print("about to discover one of ", x+5*scale, y + 63*scale, scale)
+			pancake.print("the biggest mystery in the", x+3*scale, y + 70*scale, scale)
+			pancake.print("whole universe.", x+24*scale, y + 77*scale, scale)
+		elseif text == 5 then
+			pancake.print("Chapter 2", x+16*scale, y + 26*scale, scale*2)
+			pancake.print("Rumours were true", x+16*scale, y + 50*scale, scale)
 		end
 	end
 end
 
 function love.update(dt)
 	pancake.update(dt) --Passing time between frames to pancake!
-	pancake.window.offsetY = 0 --So that our ship is followed only on x coordinate!
-	pancake.window.offsetX = pancake.window.offsetX + 24
 	if levelType == "ship" then
+		pancake.window.offsetY = 0 --So that our ship is followed only on x coordinate!
+		pancake.window.offsetX = pancake.window.offsetX + 24
 		if pancake.isButtonClicked(left) and not ship.dead and ship.fuel > 0 then
 			pancake.applyForce(ship, {x = -40, relativeToMass = true})
 			ship.flippedX = true
@@ -285,6 +341,34 @@ function love.update(dt)
 		if ship.x < 0 then
 			ship.x = 0
 			ship.velocityX = 0
+		elseif ship.x > 2020 then
+			ship.x = 2020
+			ship.velocityX = 0
+		end
+	elseif levelType == "ground" then
+		if pancake.isButtonClicked(left) then
+			pancake.applyForce(alien, {x = -40, relativeToMass = true})
+			alien.flippedX = true
+		end
+		if pancake.isButtonClicked(right) then
+			pancake.applyForce(alien, {x = 40, relativeToMass = true})
+			alien.flippedX = false
+		end
+		if pancake.isButtonClicked(up) and pancake.facing(alien).down then
+			pancake.applyForce(alien, {y = -30, relativeToMass = true},1)
+		end
+		if not pancake.facing(alien).down then
+			alien.image = pancake.animations.alien.run[1]
+		else
+			if pancake.isButtonClicked(right) or pancake.isButtonClicked(left) then
+				pancake.changeAnimation(alien, "run")
+			else
+				if alien.velocityX ~= 0 then
+					alien.image = pancake.animations.alien.idle[1]
+				else
+					pancake.changeAnimation(alien, "idle")
+				end
+			end
 		end
 	end
 end
