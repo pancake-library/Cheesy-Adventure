@@ -50,6 +50,9 @@ function loadAssets()
 	--sounds
 	pancake.addSound("laser")
 	pancake.addSound("success")
+	pancake.addSound("crash")
+	pancake.addSound("boom")
+	pancake.addSound("next")
 end
 
 function loadShipLevel(level)--level is a number of the level. This function loads everything that is needed for the ship levels
@@ -90,8 +93,13 @@ function centerPressed()
 		pancake.paused = false
 	elseif text == 0 then
 		text = 1
+		pancake.playSound("next")
 	elseif text == 1 then
+		text = 3
+		pancake.playSound("next")
+	elseif text == 3 then
 		text = 2
+		pancake.playSound("next")
 	end
 end
 
@@ -135,6 +143,8 @@ function pancake.onOverlap(object1, object2, dt) -- This function will be called
 		if not ship.invulnerable then
 			ship.invulnerable = true
 			ship.lives = ship.lives - 1
+			pancake.shakeScreen(10, 4)
+			pancake.playSound("crash")
 			if ship.lives <= 0 then
 				ship.animation = nil
 				ship.image = nil
@@ -149,6 +159,7 @@ function pancake.onOverlap(object1, object2, dt) -- This function will be called
 	elseif object1.name == "laser" and object2.name == "asteroid" then
 		pancake.trash(pancake.objects, object1.ID, "ID")
 		pancake.trash(pancake.objects, object2.ID, "ID")
+		pancake.playSound("boom")
 	end
 end
 
@@ -189,30 +200,38 @@ function drawText()
 		elseif text == 0 then
 			pancake.print("Introduction", x+23*scale, y + 6*scale, scale)
 			pancake.print("A long time ago in a galaxy", x+4*scale, y + 16*scale, scale)
-			pancake.print("far,far away... there was a ", x+scale, y + 23*scale, scale)
-			pancake.print("family named Hutt. It was", x+scale, y + 30*scale, scale)
-			pancake.print("one of the richest families", x+scale, y + 37*scale, scale)
-			pancake.print("because they were known", x+scale, y + 44*scale, scale)
-			pancake.print("for their best restaurant", x+scale, y + 51*scale, scale)
-			pancake.print("in the universe that was", x+scale, y + 58*scale, scale)
-			pancake.print("selling pizza: Pizza Hutt.", x+scale, y + 65*scale, scale)
-			pancake.print("Vesuvius Hutt, the owner", x+scale, y + 72*scale, scale)
+			pancake.print("far,far away... there was a ", x+2*scale, y + 23*scale, scale)
+			pancake.print("family named Hutt. It was", x+4*scale, y + 30*scale, scale)
+			pancake.print("one of the richest families", x+2*scale, y + 37*scale, scale)
+			pancake.print("because they were known", x+4*scale, y + 44*scale, scale)
+			pancake.print("for their best restaurant", x+3*scale, y + 51*scale, scale)
+			pancake.print("in the universe that was", x+5*scale, y + 58*scale, scale)
+			pancake.print("selling pizza: Pizza Hutt.", x+5*scale, y + 65*scale, scale)
+			pancake.print("Vesuvius Hutt, the owner", x+5*scale, y + 72*scale, scale)
 			pancake.print("of the restaurant, was the", x+scale, y + 79*scale, scale)
-			pancake.print("only known person who", x+scale, y + 86*scale, scale)
-			pancake.addObject({image = "pizza", x = 46, y = 20, width = 1, height = 1, layer = 2})
+			pancake.print("only known person who", x+8*scale, y + 86*scale, scale)
 		elseif text == 1 then
-			pancake.print("1", x+23*scale, y + 6*scale, scale)
-			pancake.print("2", x+4*scale, y + 16*scale, scale)
-			pancake.print("3", x+scale, y + 23*scale, scale)
-			pancake.print("4", x+scale, y + 30*scale, scale)
-			pancake.print("5", x+scale, y + 37*scale, scale)
-			pancake.print("6", x+scale, y + 44*scale, scale)
-			pancake.print("7", x+scale, y + 51*scale, scale)
-			pancake.print("8", x+scale, y + 58*scale, scale)
-			pancake.print("9", x+scale, y + 65*scale, scale)
-			pancake.print("10", x+scale, y + 72*scale, scale)
-			pancake.print("11", x+scale, y + 79*scale, scale)
-			pancake.print("12", x+scale, y + 86*scale, scale)
+			pancake.print("knew how to make pizza in", x+4*scale, y + 1*scale, scale)
+			pancake.print("the entire universe!", x+12*scale, y + 8*scale, scale)
+			love.graphics.draw(pancake.images.pizza,x+40*scale, y + 18*scale, 0, scale)
+			pancake.print("That is because only he", x+8*scale, y + 40*scale, scale)
+			pancake.print("knew how to make cheese. ", x+4*scale, y + 47*scale, scale)
+			pancake.print("He was known throughout", x+4*scale, y + 54*scale, scale)
+			pancake.print("the galaxy for his special", x+4*scale, y + 61*scale, scale)
+			pancake.print("cheese. Grown on the moons", x+scale, y + 68*scale, scale)
+			pancake.print("of planets over a long", x+10*scale, y + 75*scale, scale)
+			pancake.print("period of time.", x+20*scale, y + 82*scale, scale)
+		elseif text == 3 then
+			pancake.print("However, Mr. Hutt died", x+8*scale, y + 11*scale, scale)
+			pancake.print("many years ago and the", x+8*scale, y + 18*scale, scale)
+			pancake.print("only thing he left was a", x+7*scale, y + 25*scale, scale)
+			pancake.print("legend that somewhere in", x+4*scale, y + 32*scale, scale)
+			pancake.print("the universe, the last", x+10*scale, y + 39*scale, scale)
+			pancake.print("cheese planet is still", x+11*scale, y + 46*scale, scale)
+			pancake.print("existing with all the", x+12*scale, y + 53*scale, scale)
+			pancake.print("knowledge and only", x+13*scale, y + 60*scale, scale)
+			pancake.print("possibility to recover", x+10*scale, y + 67*scale, scale)
+			pancake.print("cheese recipe!", x+22*scale, y + 74*scale, scale)
 		end
 	end
 end
