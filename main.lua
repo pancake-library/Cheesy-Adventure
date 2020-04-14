@@ -1,12 +1,14 @@
 pancake =  require "pancake"
 function love.load()
+	math.randomseed(os.time())
 	love.graphics.setBackgroundColor(0.1,0.1,0.1,1) --So it won't merge with pancake's background!!!
 	pancake.init({window = {pixelSize = love.graphics.getHeight()/96, width = 96, height = 96}}) --Initiating pancake and setting pixelSize, so that the pancake display will be the height of the window! pixelSize is how many pixels every pancake pixel should take
 	pancake.loadAnimation = nil
 	pancake.paused = false
 	--pancake.debugMode = true
 	loadAssets()
-	loadLevel(1)
+	level = 1
+	loadLevel(level)
 	pancake.background.image = pancake.images.background
 	left = pancake.addButton({key = "a", name="left",x = 1*pancake.window.pixelSize, y = love.graphics.getHeight()-16*pancake.window.pixelSize, width = 14, height = 14, scale = pancake.window.pixelSize})
 	right = pancake.addButton({key = "d", name="right",x = 17*pancake.window.pixelSize, y = love.graphics.getHeight()-16*pancake.window.pixelSize, width = 14, height = 14, scale = pancake.window.pixelSize})
@@ -18,7 +20,7 @@ end
 function loadLevel(level)
 	if level == 1 then
 		loadShipLevel()
-		pancake.addObject({image = "earth", x = 1020, y = 43, width = 1, height = 1, layer = 2})
+		pancake.addObject({image = "earth", x = 1990, y = 43, width = 1, height = 1, layer = 2})
 		pancake.paused = true
 		text = 0
 	end
@@ -53,6 +55,10 @@ function loadAssets()
 	pancake.addSound("crash")
 	pancake.addSound("boom")
 	pancake.addSound("next")
+	--music
+	chapter1 = love.audio.newSource("music/chapter1.ogg", "stream")
+	chapter1:setLooping(true)
+	chapter1:setVolume(2.2)
 end
 
 function loadShipLevel(level)--level is a number of the level. This function loads everything that is needed for the ship levels
@@ -68,13 +74,15 @@ function loadShipLevel(level)--level is a number of the level. This function loa
 	ship.maxVelocity = 100
 	ship.lives = 3
 	ship.fuel = 10
-	ship.fuelTimer = pancake.addTimer(30000, "repetetive", decreaseFuel)
-	for w = 2, 40 do
+	ship.fuelTimer = pancake.addTimer(4000, "repetetive", decreaseFuel)
+	for w = 2, 100 do
 		for i = 1, 5 do
 			pancake.applyForce(createAsteroid(math.random(w*25,w*25+25), math.random(0,80), math.random(1,2)),{x=-math.random(0,7), y = math.random(-4,4), relativeToMass = true},1)
 		end
 	end
-	createAsteroid(40, 40, 2)
+	for i =1, 6 do
+		pancake.addObject({name = "fuel", image = "fuel", x=i*350, y = math.random(0,80), width = 7, height = 9})
+	end
 end
 
 function decreaseFuel()
@@ -87,6 +95,9 @@ end
 function centerPressed()
 	if levelType == "ship" and text == nil then
 			shoot()
+			if ship.dead then
+				loadLevel(level)
+			end
 	end
 	if text == 2 then
 		text = nil
@@ -99,7 +110,7 @@ function centerPressed()
 		pancake.playSound("next")
 	elseif text == 3 then
 		text = 2
-		pancake.playSound("next")
+		chapter1:play()
 	end
 end
 
@@ -160,6 +171,10 @@ function pancake.onOverlap(object1, object2, dt) -- This function will be called
 		pancake.trash(pancake.objects, object1.ID, "ID")
 		pancake.trash(pancake.objects, object2.ID, "ID")
 		pancake.playSound("boom")
+	elseif object1.name == "ship" and object2.name == "fuel" then
+		ship.fuel = 11
+		pancake.trash(pancake.objects, object2.ID, "ID")
+		pancake.playSound("success")
 	end
 end
 
@@ -176,12 +191,17 @@ function love.draw()
 	local scale = pancake.window.pixelSize
 	pancake.draw() --Sets the canvas right! If pancake.autoDraw is set to true (which is its default state) the canvas will be automatically drawn on the window x and y
 	if levelType == "ship" and text == nil then
-		pancake.print(pancake.round(1000 - ship.x) .. "m", pancake.window.x, pancake.window.y, pancake.window.pixelSize)
+		pancake.print(pancake.round(2000 - ship.x) .. "m", pancake.window.x, pancake.window.y, pancake.window.pixelSize)
 		love.graphics.rectangle("fill" , x + 90*scale, y + 84*scale, 3*scale, 10*scale)
 		love.graphics.setColor(1, 0, 0, 1)
-		love.graphics.rectangle("fill" , x + 90*scale, y + (94 - ship.fuel)*scale, 3*scale, 10*scale)
+		love.graphics.rectangle("fill" , x + 90*scale, y + (94 - ship.fuel)*scale, 3*scale, 12*scale)
 		love.graphics.setColor(1, 1, 1, 1)
 		love.graphics.draw(pancake.images.fuel_ui, x + 80*scale, y + 80*scale, 0, scale)
+		if ship.dead then
+			pancake.print("Press", x + 30*scale, y + 24*scale, 2*scale)
+			pancake.print("J", x + 44*scale, y + 44*scale, 2*scale)
+			pancake.print("restart", x + 25*scale, y + 64*scale, 2*scale)
+		end
 	end
 	drawText()
 end
