@@ -4,11 +4,12 @@ function love.load()
 	love.graphics.setBackgroundColor(0.1,0.1,0.1,1) --So it won't merge with pancake's background!!!
 	pancake.init({window = {pixelSize = love.graphics.getHeight()/96, width = 96, height = 96}}) --Initiating pancake and setting pixelSize, so that the pancake display will be the height of the window! pixelSize is how many pixels every pancake pixel should take
 	pancake.loadAnimation = nil
-	pancake.paused = false
+	--pancake.paused = false
 	--pancake.debugMode = true
 	loadAssets()
-	level = 1
-	loadLevel(level)
+	text = 4
+	level = 2
+	--loadLevel(level)
 	pancake.background.image = pancake.images.background
 	left = pancake.addButton({key = "a", name="left",x = 1*pancake.window.pixelSize, y = love.graphics.getHeight()-16*pancake.window.pixelSize, width = 14, height = 14, scale = pancake.window.pixelSize})
 	right = pancake.addButton({key = "d", name="right",x = 17*pancake.window.pixelSize, y = love.graphics.getHeight()-16*pancake.window.pixelSize, width = 14, height = 14, scale = pancake.window.pixelSize})
@@ -26,8 +27,84 @@ function loadLevel(level)
 		text = 0
 	elseif level == 2 then
 		loadGroundLevel()
+		alien.pages = 0
 		pancake.paused = false
+		pancake.addObject({name = "ship", image = "ship", x = 0, y = 66, width = 14, height = 10})
+		rectangle(-8*8, 10*8, 20, 5)
+		rectangle(4*8, 18*8, 40, 3)
+		rectangle(-8*8, 15*8, 8, 10)
+		rectangle(-8*8, 25*8, 22, 6)
+		pancake.addObject({name = "ground", image = "ground", x = 8, y = 150, width = 8, height = 8, colliding = true})
+		pancake.addObject({name = "ground", image = "ground", x = 32, y = 165, width = 8, height = 8, colliding = true})
+		pancake.addObject({name = "ground", image = "ground", x = 8, y = 180, width = 8, height = 8, colliding = true})
+		pancake.addObject({name = "ground", image = "ground", x = 16, y = 195, width = 8, height = 8, colliding = true})
+		spike(120,241,22)
+		rectangle(3*8, 31*8, 40, 6)
+		pancake.addObject({name = "safePlace", x = 100, y = 191, width = 8, height = 8})
+		pancake.addObject({name = "ground", image = "ground", x = 150, y = 205, width = 8, height = 8, colliding = true})
+		pancake.addObject({name = "ground", image = "ground", x = 180, y = 195, width = 8, height = 8, colliding = true})
+		pancake.addObject({name = "ground", image = "ground", x = 185, y = 210, width = 8, height = 8, colliding = true})
+		rectangle(37*8,21*8,6,6)
+		rectangle(43*8,8*8,20,40)
+		spike(296,168,6, "left")
+		page1 = pancake.addObject({name = "page", x = 341, y = 239, width = 8, height = 8})
+		pancake.changeAnimation(page1, "idle")
+		spike(55,137,4)
+		pancake.addObject({name = "safePlace", x = 40, y = 135, width = 8, height = 8})
+		pancake.addObject({name = "safePlace", x = 96, y = 135, width = 8, height = 8})
+		pancake.addObject({name = "ground", image = "ground", x = 118, y = 137, width = 8, height = 8, colliding = true})
+		pancake.addObject({name = "ground", image = "ground", x = 100, y = 120, width = 8, height = 8, colliding = true})
+		pancake.addObject({name = "ground", image = "ground", x = 140, y = 107, width = 8, height = 8, colliding = true})
+		pancake.addObject({name = "ground", image = "ground", x = 104, y = 90, width = 8, height = 8, colliding = true})
+		rock1 = pancake.applyPhysics(pancake.addObject({name = "rock1", image = "ground", x = 148, y = 107, width = 8, height = 8, colliding = true}))
+		rock1.mass = 9999
+		rock1.velocityX = 10
+		pancake.addForce(rock1, {time = "infinite",  y = -pancake.physics.gravityY, relativeToMass = true})
+		pancake.addObject({name = "ground", image = "ground", x = 330, y = 117, width = 8, height = 8, colliding = true})
+		pancake.addObject({name = "ground", image = "ground", x = 347, y = 96, width = 8, height = 8, colliding = true})
+		pancake.addObject({name = "ground", image = "ground", x = 322, y = 85, width = 8, height = 8, colliding = true})
+		pancake.addObject({name = "ground", image = "ground", x = 347, y = 74, width = 8, height = 8, colliding = true})
+		pancake.addObject({name = "jump_pad", image = "jump_pad", x = 479, y = 63, width = 16, height = 4})
+		rectangle(32,0,11,6)
+		pancake.addObject({name = "ground", image = "ground", x = 140, y = 62, width = 8, height = 8, colliding = true})
+		rectangle(32+16*8,-40,4,5)
+		rectangle(32+20*8,0,8,2)
+		rectangle(64 + 12*8, 0, 5, 5)
+		pancake.addObject({name = "ground", image = "ground", x = 160, y = 48, width = 8, height = 8, colliding = true})
+		pancake.addObject({name = "ground", image = "ground", x = 168, y = 48, width = 8, height = 8, colliding = true})
+		pancake.addObject({name = "ground", image = "ground", x = 168, y = 40, width = 8, height = 8, colliding = true})
+		pancake.addObject({name = "ground", image = "ground", x = 128, y = 29, width = 8, height = 8, colliding = true})
+		pancake.addObject({name = "ground", image = "ground", x = 160, y = 17, width = 8, height = 8, colliding = true})
+		pancake.applyPhysics(pancake.addObject({name = "spike1", image = "spike_down", x = 150, y = -30, width = 7, height = 7, colliding = true})).velocityY = 20
+		spike(58,-7,7)
+		page2 = pancake.addObject({name = "page", x = 45, y = -9, width = 8, height = 8})
+		pancake.changeAnimation(page2, "idle")
+		pancake.addObject({name = "esater_egg", image = "easter_egg", x = 233, y = -30, width = 8, height = 8})
+		rectangle(63*8,-8*8,20,60)
+		rectangle(66*8,-16*8,10,8)
+		page3 = pancake.addObject({name = "page", x = 65*8, y = -9*8-3, width = 8, height = 8})
+		pancake.changeAnimation(page3, "idle")
 	end
+end
+
+function rectangle(x, y, width, height)
+	pancake.addObject({name = "ground", image = "ground", x = x+8, y = y, width = width*8, height = height*8, colliding = true, textured = true, texture = {width = 8, height = 8}})
+end
+
+function spike(x,y,length,type)
+	local type = type or "up"
+	if type == "up" then
+			pancake.addObject({name = "spike", image = "spike_"..type, x = x, y = y, width = length*8, height = 7,textured = true, texture = {width = 8, height = 7}})
+	elseif type == "left" then
+			pancake.addObject({name = "spike", image = "spike_"..type, x = x, y = y, width = 7, height = length*8,textured = true, texture = {width = 7, height = 8}})
+	end
+end
+
+function killAlien()
+	alien.x = alien.safePlace.x
+	alien.y = alien.safePlace.y
+	alien.velocityX = 0
+	alien.velocityY = 0
 end
 
 function loadAssets()
@@ -36,6 +113,7 @@ function loadAssets()
 	pancake.addAnimation("ship","crash","images/animations",250)
 	pancake.addAnimation("alien","idle","images/animations",180)
 	pancake.addAnimation("alien","run","images/animations",150)
+	pancake.addAnimation("page","idle","images/animations",200)
 	--Adding buttons
 	pancake.addImage("right", "images/ui")
 	pancake.addImage("right_clicked", "images/ui")
@@ -59,6 +137,13 @@ function loadAssets()
 	pancake.addImage("earth", "images")
 	pancake.addImage("pizza", "images")
 	pancake.addImage("ground", "images")
+	pancake.addImage("ship", "images")
+	pancake.addImage("spike_up", "images")
+	pancake.addImage("spike_down", "images")
+	pancake.addImage("spike_right", "images")
+	pancake.addImage("spike_left", "images")
+	pancake.addImage("jump_pad", "images")
+	pancake.addImage("easter_egg", "images")
 	--sounds
 	pancake.addSound("laser")
 	pancake.addSound("success")
@@ -77,14 +162,14 @@ end
 function loadGroundLevel()
 	levelType = "ground"
 	pancake.physics.gravityY = 0.2*pancake.physics.gravityY
-	alien = pancake.applyPhysics(pancake.addObject({name = "alien", x = 40, y = 40, width = 5, height = 9, offsetX = -5, offsetY = -5, colliding = true}))
+	alien = pancake.applyPhysics(pancake.addObject({name = "alien", x = 15, y = 70, width = 5, height = 9, offsetX = -5, offsetY = -5, colliding = true}))
+	--alien.x = 233
+	--alien.y = -10
+	alien.maxVelocityX = 40
+	alien.maxVelocityY = 150
 	pancake.changeAnimation(alien, "idle")
 	pancake.cameraFollow = alien
-	for x = 0, 10 do
-		for y = 0, 5 do
-			pancake.addObject({name = "ground", image = "ground", x = x*8, y = 80 + y*8, width = 8, height = 8, colliding = true})
-		end
-	end
+	alien.safePlace = {x = 15, y = 70}
 end
 
 function loadShipLevel(level)--level is a number of the level. This function loads everything that is needed for the ship levels
@@ -145,6 +230,9 @@ function centerPressed()
 	elseif text == 5 then
 		text = nil
 		loadLevel(2)
+	elseif text == 6 then
+		text = nil
+		pancake.paused = false
 	end
 end
 
@@ -175,8 +263,36 @@ function deleteLaser(laser)
 	pancake.trash(pancake.objects, laser.ID, "ID")
 end
 
-function pancake.onCollision() --This function will be called whenever a physic object collides with a colliding object!
-	--Insert your amazing code here!
+function pancake.onCollision(object1, object2, axis, direction, sc) --This function will be called whenever a physic object collides with a colliding object!
+	if object1.name == "rock1" and axis == "x" then
+		pancake.trash(pancake.objects, object1.ID, "ID")
+		rock1 = pancake.applyPhysics(pancake.addObject({name = "rock1", image = "ground", x = 148, y = 107, width = 8, height = 8, colliding = true}))
+		rock1.mass = 9999
+		rock1.velocityX = 10
+		pancake.addForce(rock1, {time = "infinite",  y = -pancake.physics.gravityY, relativeToMass = true})
+	elseif object2.name == "rock1" and axis == "x" then
+		pancake.trash(pancake.objects, object2.ID, "ID")
+		rock1 = pancake.applyPhysics(pancake.addObject({name = "rock1", image = "ground", x = 148, y = 107, width = 8, height = 8, colliding = true}))
+		rock1.mass = 9999
+		rock1.velocityX = 10
+		pancake.addForce(rock1, {time = "infinite",  y = -pancake.physics.gravityY, relativeToMass = true})
+	elseif object1.name == "spike1" and axis == "y" then
+		if axis == "y" then
+			pancake.trash(pancake.objects, object1.ID, "ID")
+			pancake.applyPhysics(pancake.addObject({name = "spike1", image = "spike_down", x = 150, y = -30, width = 7, height = 7, colliding = true})).velocityY = 20
+		end
+		if object2.name == "alien" then
+			killAlien()
+		end
+	elseif object2.name == "spike1" and axis == "y" then
+		if axis == "y" then
+			pancake.trash(pancake.objects, object2.ID, "ID")
+			pancake.applyPhysics(pancake.addObject({name = "spike1", image = "spike_down", x = 150, y = -30, width = 7, height = 7, colliding = true})).velocityY = 20
+		end
+		if object1.name == "alien" then
+			killAlien()
+		end
+	end
 end
 
 function pancake.onLoad() -- This function will be called when pancake start up is done (after the animation)
@@ -184,40 +300,60 @@ function pancake.onLoad() -- This function will be called when pancake start up 
 end
 
 function pancake.onOverlap(object1, object2, dt) -- This function will be called every time object "collides" with a non colliding object! Parameters: object1, object2 - objects of collision, dt - time of collision
-	if object1.name == "ship" and object2.name == "asteroid" then
-		if not ship.invulnerable then
-			ship.invulnerable = true
-			ship.lives = ship.lives - 1
-			pancake.shakeScreen(10, 4)
-			pancake.playSound("crash")
-			if ship.lives <= 0 then
-				ship.animation = nil
-				ship.image = nil
-				ship.dead = true
-				ship.velocityX = 0
-				ship.velocityY = 0
-			else
-				pancake.changeAnimation(ship, "crash")
-				pancake.addTimer(2000, "single", idleShip)
+	if levelType == "ship" then
+		if object1.name == "ship" and object2.name == "asteroid" then
+			if not ship.invulnerable then
+				ship.invulnerable = true
+				ship.lives = ship.lives - 1
+				pancake.shakeScreen(10, 4)
+				pancake.playSound("crash")
+				if ship.lives <= 0 then
+					ship.animation = nil
+					ship.image = nil
+					ship.dead = true
+					ship.velocityX = 0
+					ship.velocityY = 0
+				else
+					pancake.changeAnimation(ship, "crash")
+					pancake.addTimer(2000, "single", idleShip)
+				end
 			end
+		elseif object1.name == "laser" and object2.name == "asteroid" then
+			pancake.trash(pancake.objects, object1.ID, "ID")
+			pancake.trash(pancake.objects, object2.ID, "ID")
+			pancake.playSound("boom")
+		elseif object1.name == "ship" and object2.name == "fuel" then
+			ship.fuel = 11
+			pancake.trash(pancake.objects, object2.ID, "ID")
+			pancake.playSound("success")
+		elseif object1.name == "ship" and object2.name == "earth" then
+			pancake.timers = {}
+			pancake.objects = {}
+			text = 4
+			if chapter1 then
+				chapter1:pause()
+				chapter1 = nil
+			end
+			pancake.paused = true
 		end
-	elseif object1.name == "laser" and object2.name == "asteroid" then
-		pancake.trash(pancake.objects, object1.ID, "ID")
-		pancake.trash(pancake.objects, object2.ID, "ID")
-		pancake.playSound("boom")
-	elseif object1.name == "ship" and object2.name == "fuel" then
-		ship.fuel = 11
-		pancake.trash(pancake.objects, object2.ID, "ID")
-		pancake.playSound("success")
-	elseif object1.name == "ship" and object2.name == "earth" then
-		pancake.timers = {}
-		pancake.objects = {}
-		text = 4
-		if chapter1 then
-			chapter1:pause()
-			chapter1 = nil
+	elseif levelType == "ground" then
+		if object1.name == "alien" and object2.name == "spike" then
+			killAlien()
+		elseif object1.name == "alien" and object2.name == "safePlace" then
+			alien.safePlace.x = object2.x
+			alien.safePlace.y = object2.y
+		elseif object1.name == "alien" and object2.name == "page" then
+			pancake.trash(pancake.objects, object2.ID, "ID")
+			alien.pages = alien.pages + 1
+			pancake.playSound("success")
+			if alien.pages == 1 then
+				pancake.paused = true
+				text = 6
+			end
+		elseif object1.name == "alien" and object2.name == "jump_pad" then
+			alien.y = alien.y - 1
+			alien.velocityY = -80
 		end
-		pancake.paused = true
 	end
 end
 
@@ -234,7 +370,7 @@ function love.draw()
 	local scale = pancake.window.pixelSize
 	pancake.draw() --Sets the canvas right! If pancake.autoDraw is set to true (which is its default state) the canvas will be automatically drawn on the window x and y
 	if levelType == "ship" and text == nil then
-		pancake.print(pancake.round(2000 - ship.x) .. "m", pancake.window.x, pancake.window.y, pancake.window.pixelSize)
+		pancake.print(pancake.round(2000 - ship.x) .. "m", pancake.window.x, pancake.window.y, scale)
 		love.graphics.rectangle("fill" , x + 90*scale, y + 84*scale, 3*scale, 10*scale)
 		love.graphics.setColor(1, 0, 0, 1)
 		love.graphics.rectangle("fill" , x + 90*scale, y + (94 - ship.fuel)*scale, 3*scale, 12*scale)
@@ -244,6 +380,11 @@ function love.draw()
 			pancake.print("Press", x + 30*scale, y + 24*scale, 2*scale)
 			pancake.print("J", x + 44*scale, y + 44*scale, 2*scale)
 			pancake.print("restart", x + 25*scale, y + 64*scale, 2*scale)
+		end
+	elseif levelType == "ground" and text == nil then
+		if alien.pages and not pancake.debugMode then
+			love.graphics.setColor(1, 1, 1, 1)
+			pancake.print(alien.pages .. "/3 pages", pancake.window.x + 3*scale, pancake.window.y+3*scale, pancake.window.pixelSize)
 		end
 	end
 	drawText()
@@ -314,6 +455,9 @@ function drawText()
 		elseif text == 5 then
 			pancake.print("Chapter 2", x+16*scale, y + 26*scale, scale*2)
 			pancake.print("Rumours were true", x+16*scale, y + 50*scale, scale)
+		elseif text == 6 then
+			pancake.print("Page 1", x+16*scale, y + 26*scale, scale*2)
+
 		end
 	end
 end
@@ -351,17 +495,19 @@ function love.update(dt)
 			ship.x = 2020
 			ship.velocityX = 0
 		end
+
+	--GROUND
 	elseif levelType == "ground" then
 		if pancake.isButtonClicked(left) then
-			pancake.applyForce(alien, {x = -40, relativeToMass = true})
+			pancake.applyForce(alien, {x = -70, relativeToMass = true})
 			alien.flippedX = true
 		end
 		if pancake.isButtonClicked(right) then
-			pancake.applyForce(alien, {x = 40, relativeToMass = true})
+			pancake.applyForce(alien, {x = 70, relativeToMass = true})
 			alien.flippedX = false
 		end
 		if pancake.isButtonClicked(up) and pancake.facing(alien).down then
-			pancake.applyForce(alien, {y = -30, relativeToMass = true},1)
+			pancake.applyForce(alien, {y = -32, relativeToMass = true},1)
 		end
 		if not pancake.facing(alien).down then
 			alien.image = pancake.animations.alien.run[1]
@@ -376,6 +522,14 @@ function love.update(dt)
 				end
 			end
 		end
+		if alien.x < 0 then
+			alien.x = 0
+			alien.velocityX = 0
+		elseif alien.x > 1000 then
+			alien.x = 1000
+			alien.velocityX = 0
+		end
+
 	end
 end
 

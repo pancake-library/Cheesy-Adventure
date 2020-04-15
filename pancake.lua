@@ -63,7 +63,6 @@ function pancake.init (settings)
 	physics.energyLoss = physics.energyLoss or 0
 	pancake.physics = physics
 	--End of physics
-	pancake.onCollision = nil
 	pancake.lastdt = 0.001
 	pancake.smoothRender = settings.smoothRender or false
 	pancake.target = nil
@@ -282,6 +281,14 @@ function drawObjects()
 					local offsetX = pancake.boolConversion(object.offsetX, object.offsetX, 0)*pancake.boolConversion(object.flippedX, -1, 1)
 					local offsetY = pancake.boolConversion(object.offsetY, object.offsetY, 0)*pancake.boolConversion(object.flippedY, -1, 1)
 					love.graphics.draw(pancake.images[object.image], x + offsetX + pancake.boolConversion(object.flippedX, object.width, 0), y + offsetY + pancake.boolConversion(object.flippedY, object.height, 0), 0, pancake.boolConversion(object.flippedX, -1, 1),pancake.boolConversion(object.flippedY, -1, 1))
+					if object.textured then
+						local texture = object.texture
+						for px = 0, math.floor(object.width)/texture.width-1 do
+							for py = 0, math.floor(object.height)/texture.height-1 do
+								love.graphics.draw(pancake.images[object.image], x + px*texture.width,  y + py*texture.height)
+							end
+						end
+					end
 				end
 			end
 		end
@@ -1411,6 +1418,7 @@ function defineLetters()
 	letters["0"] = {pix(11), pix(12), pix(13), pix(14), pix(21), pix(24), pix(31), pix(32), pix(33), pix(34), width = 3}
 	letters["?"] = {pix(11), pix(21), pix(23), pix(25), pix(21), pix(31), pix(32), width = 3}
 	letters["-"] = {pix(13), pix(23), pix(33), width = 3}
+	letters["/"] = {pix(13), pix(14), pix(21),pix(22), width = 2}
 
 end
 
