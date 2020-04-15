@@ -5,11 +5,12 @@ function love.load()
 	pancake.init({window = {pixelSize = love.graphics.getHeight()/96, width = 96, height = 96}}) --Initiating pancake and setting pixelSize, so that the pancake display will be the height of the window! pixelSize is how many pixels every pancake pixel should take
 	pancake.loadAnimation = nil
 	--pancake.paused = false
+	pancake.smoothRender = true
 	--pancake.debugMode = true
 	loadAssets()
-	text = 4
-	level = 2
-	--loadLevel(level)
+	text = 0
+	level = 1
+	loadLevel(level)
 	pancake.background.image = pancake.images.background
 	left = pancake.addButton({key = "a", name="left",x = 1*pancake.window.pixelSize, y = love.graphics.getHeight()-16*pancake.window.pixelSize, width = 14, height = 14, scale = pancake.window.pixelSize})
 	right = pancake.addButton({key = "d", name="right",x = 17*pancake.window.pixelSize, y = love.graphics.getHeight()-16*pancake.window.pixelSize, width = 14, height = 14, scale = pancake.window.pixelSize})
@@ -46,8 +47,8 @@ function loadLevel(level)
 		pancake.addObject({name = "ground", image = "ground", x = 185, y = 210, width = 8, height = 8, colliding = true})
 		rectangle(37*8,21*8,6,6)
 		rectangle(43*8,8*8,20,40)
-		spike(296,168,6, "left")
-		page1 = pancake.addObject({name = "page", x = 341, y = 239, width = 8, height = 8})
+		spike(297,168,6, "left")
+		local page1 = pancake.addObject({name = "page", x = 341, y = 239, width = 8, height = 8})
 		pancake.changeAnimation(page1, "idle")
 		spike(55,137,4)
 		pancake.addObject({name = "safePlace", x = 40, y = 135, width = 8, height = 8})
@@ -77,18 +78,22 @@ function loadLevel(level)
 		pancake.addObject({name = "ground", image = "ground", x = 160, y = 17, width = 8, height = 8, colliding = true})
 		pancake.applyPhysics(pancake.addObject({name = "spike1", image = "spike_down", x = 150, y = -30, width = 7, height = 7, colliding = true})).velocityY = 20
 		spike(58,-7,7)
-		page2 = pancake.addObject({name = "page", x = 45, y = -9, width = 8, height = 8})
+		local page2 = pancake.addObject({name = "page", x = 45, y = -9, width = 8, height = 8})
 		pancake.changeAnimation(page2, "idle")
 		pancake.addObject({name = "esater_egg", image = "easter_egg", x = 233, y = -30, width = 8, height = 8})
 		rectangle(63*8,-8*8,20,60)
 		rectangle(66*8,-16*8,10,8)
-		page3 = pancake.addObject({name = "page", x = 65*8, y = -9*8-3, width = 8, height = 8})
+		local page3 = pancake.addObject({name = "page", x = 65*8, y = -9*8-3, width = 8, height = 8})
 		pancake.changeAnimation(page3, "idle")
+		pancake.addObject({name = "safePlace", x = 140, y = 53, width = 8, height = 8})
+		pancake.addObject({name = "fake_ground", image = "ground", x = 200, y = -40, width = 8*8, height = 5*8, textured = true, texture = {width = 8, height = 8}})
+	elseif level == 3 then
+		loadGroundLevel()
 	end
 end
 
 function rectangle(x, y, width, height)
-	pancake.addObject({name = "ground", image = "ground", x = x+8, y = y, width = width*8, height = height*8, colliding = true, textured = true, texture = {width = 8, height = 8}})
+	return pancake.addObject({name = "ground", image = "ground", x = x+8, y = y, width = width*8, height = height*8, colliding = true, textured = true, texture = {width = 8, height = 8}})
 end
 
 function spike(x,y,length,type)
@@ -144,6 +149,7 @@ function loadAssets()
 	pancake.addImage("spike_left", "images")
 	pancake.addImage("jump_pad", "images")
 	pancake.addImage("easter_egg", "images")
+	pancake.addImage("page", "images")
 	--sounds
 	pancake.addSound("laser")
 	pancake.addSound("success")
@@ -153,15 +159,20 @@ function loadAssets()
 	--music
 	chapter1 = love.audio.newSource("music/chapter1.ogg", "stream")
 	chapter1:setLooping(true)
-	chapter1:setVolume(2)
+	chapter1:setVolume(1.2)
 	chapter2 = love.audio.newSource("music/chapter2.ogg", "stream")
 	chapter2:setLooping(true)
-	chapter2:setVolume(2.6)
+	chapter2:setVolume(1.8)
+	chapter3 = love.audio.newSource("music/chapter3.ogg", "stream")
+	chapter3:setLooping(true)
+	chapter3:setVolume(1.2)
 end
 
 function loadGroundLevel()
+	pancake.objects = {}
+	pancake.timers = {}
 	levelType = "ground"
-	pancake.physics.gravityY = 0.2*pancake.physics.gravityY
+	pancake.physics.gravityY = 0.2*12*pancake.meter
 	alien = pancake.applyPhysics(pancake.addObject({name = "alien", x = 15, y = 70, width = 5, height = 9, offsetX = -5, offsetY = -5, colliding = true}))
 	--alien.x = 233
 	--alien.y = -10
@@ -231,6 +242,22 @@ function centerPressed()
 		text = nil
 		loadLevel(2)
 	elseif text == 6 then
+		text = nil
+		pancake.paused = false
+	elseif text == 7 then
+		text = nil
+		pancake.paused = false
+	elseif text == 8 then
+		text = 9
+		pancake.playSound("next")
+	elseif text == 9 then
+		text = nil
+		pancake.paused = false
+	elseif text == 10 then
+		text = 11
+		chapter3:play()
+		loadLevel(3)
+	elseif text == 11 then
 		text = nil
 		pancake.paused = false
 	end
@@ -349,10 +376,25 @@ function pancake.onOverlap(object1, object2, dt) -- This function will be called
 			if alien.pages == 1 then
 				pancake.paused = true
 				text = 6
+			elseif alien.pages == 2 then
+				pancake.paused = true
+				text = 7
+			elseif alien.pages == 3 then
+				pancake.paused = true
+				text = 8
 			end
 		elseif object1.name == "alien" and object2.name == "jump_pad" then
 			alien.y = alien.y - 1
 			alien.velocityY = -80
+		elseif object1.name == "alien" and object2.name == "fake_ground" then
+			pancake.trash(pancake.objects, object2.ID, "ID")
+		elseif object1.name == "alien" and object2.name == "ship" and alien.pages == 3 then
+			pancake.paused = true
+			text = 10
+			if chapter2 then
+				chapter2:pause()
+				chapter2 = nil
+			end
 		end
 	end
 end
@@ -383,11 +425,16 @@ function love.draw()
 		end
 	elseif levelType == "ground" and text == nil then
 		if alien.pages and not pancake.debugMode then
+			love.graphics.setColor(0, 0, 0, 1)
+			love.graphics.rectangle("fill" , x, y, 40*scale, 10*scale)
 			love.graphics.setColor(1, 1, 1, 1)
 			pancake.print(alien.pages .. "/3 pages", pancake.window.x + 3*scale, pancake.window.y+3*scale, pancake.window.pixelSize)
 		end
 	end
 	drawText()
+	if pancake.debugMode then
+		pancake.print(love.timer.getFPS(),0,0,3*scale)
+	end
 end
 
 function drawText()
@@ -450,14 +497,71 @@ function drawText()
 			pancake.print("the moon...", x+32*scale, y + 49*scale, scale)
 			pancake.print("Little did he know, he was", x+4*scale, y + 56*scale, scale)
 			pancake.print("about to discover one of ", x+5*scale, y + 63*scale, scale)
-			pancake.print("the biggest mystery in the", x+3*scale, y + 70*scale, scale)
-			pancake.print("whole universe.", x+24*scale, y + 77*scale, scale)
+			pancake.print("the biggest mysteries in", x+7*scale, y + 70*scale, scale)
+			pancake.print("the whole universe.", x+18*scale, y + 77*scale, scale)
 		elseif text == 5 then
 			pancake.print("Chapter 2", x+16*scale, y + 26*scale, scale*2)
 			pancake.print("Rumours were true", x+16*scale, y + 50*scale, scale)
 		elseif text == 6 then
-			pancake.print("Page 1", x+16*scale, y + 26*scale, scale*2)
-
+			love.graphics.draw(pancake.images.page, x, y, 0, scale)
+			love.graphics.setColor(0.4, 0.3, 0.2, 1)
+			pancake.print("This is Vesuvius Hutt, it all", x+1*scale, y + 2*scale, scale)
+			pancake.print("went wrong! This cheese is", x+3*scale, y + 9*scale, scale)
+			pancake.print("EXPIRED! It seems that a", x+2*scale, y + 16*scale, scale)
+			pancake.print("part of the moon with ", x+7*scale, y + 23*scale, scale)
+			pancake.print("bacteria on it landed on", x+4*scale, y + 30*scale, scale)
+			pancake.print("the planet. This caused an", x+3*scale, y + 37*scale, scale)
+			pancake.print("evolution. These animals", x+4*scale, y + 44*scale, scale)
+			pancake.print("went back on moon. They", x+3*scale, y + 51*scale, scale)
+			pancake.print("call themselves HUMANS.", x+3*scale, y + 58*scale, scale)
+			pancake.print("I have to watch out, they", x+5*scale, y + 65*scale, scale)
+			pancake.print("look dangerous. Before", x+6*scale, y + 72*scale, scale)
+			pancake.print("I got back to my ship, they", x+2*scale, y + 80*scale, scale)
+			pancake.print("found it and destroyed it!", x+3*scale, y + 87*scale, scale)
+		elseif text == 7 then
+			love.graphics.draw(pancake.images.page, x, y, 0, scale)
+			love.graphics.setColor(0.4, 0.3, 0.2, 1)
+			pancake.print("Hutt again, today I have ", x+1*scale, y + 2*scale, scale)
+			pancake.print("noticed that humans have", x+3*scale, y + 9*scale, scale)
+			pancake.print("their own way to make", x+10*scale, y + 16*scale, scale)
+			pancake.print("cheese. How ironic.. anyway,", x+0*scale, y + 23*scale, scale)
+			pancake.print("I named this galaxy Milky", x+4*scale, y + 30*scale, scale)
+			pancake.print(" Way for a reason and it", x+3*scale, y + 37*scale, scale)
+			pancake.print("was supposed to be the ", x+4*scale, y + 44*scale, scale)
+			pancake.print("biggest cheese warehouse", x+3*scale, y + 51*scale, scale)
+			pancake.print("in the entire universe, but", x+3*scale, y + 58*scale, scale)
+			pancake.print("it seems like all my hope is", x+5*scale, y + 65*scale, scale)
+			pancake.print("lost, I am stuck here", x+6*scale, y + 72*scale, scale)
+			pancake.print("forever. There is a human", x+2*scale, y + 80*scale, scale)
+			pancake.print("base on the west though!", x+3*scale, y + 87*scale, scale)
+		elseif text == 8 then
+			love.graphics.draw(pancake.images.page, x, y, 0, scale)
+			love.graphics.setColor(0.4, 0.3, 0.2, 1)
+			pancake.print("I am about starve to death. ", x+1*scale, y + 2*scale, scale)
+			pancake.print("Funny, considering I am on", x+3*scale, y + 9*scale, scale)
+			pancake.print("something that is huge and", x+2*scale, y + 16*scale, scale)
+			pancake.print("was suppose to be food...", x+4*scale, y + 23*scale, scale)
+			pancake.print("I want the universe to know", x+0*scale, y + 30*scale, scale)
+			pancake.print("HOW TO CRAFT CHEESE", x+5*scale, y + 37*scale, scale)
+			pancake.print("and only I know how to do it ", x+0*scale, y + 44*scale, scale)
+			pancake.print("for now. Well, humans too.", x+3*scale, y + 51*scale, scale)
+			pancake.print("If I die here, go and seek", x+4*scale, y + 58*scale, scale)
+			pancake.print("for their base on the west", x+5*scale, y + 65*scale, scale)
+			pancake.print("side of this moon.", x+20*scale, y + 72*scale, scale)
+			pancake.print("P.S. I am dying, you are", x+10*scale, y + 80*scale, scale)
+			pancake.print("the only hope for cheese!", x+5*scale, y + 87*scale, scale)
+		elseif text == 9 then
+			pancake.print("I have to get back to my", x+5*scale, y + 30*scale, scale)
+			pancake.print("ship! - said our hero -", x+8*scale, y + 37*scale, scale)
+			pancake.print("I can finally get the", x+10*scale, y + 44*scale, scale)
+			pancake.print("cheese recipe!", x+20*scale, y + 51*scale, scale)
+		elseif text == 11 then
+			pancake.print("Chapter 3", x+16*scale, y + 26*scale, scale*2)
+			pancake.print("Recipe hunger", x+24*scale, y + 50*scale, scale)
+		elseif text == 10 then
+			pancake.print("After returning to his", x+8*scale, y + 37*scale, scale)
+			pancake.print("ship, he grabbed his", x+14*scale, y + 44*scale, scale)
+			pancake.print("trusty pocket time stopper.", x+0*scale, y + 51*scale, scale)
 		end
 	end
 end
