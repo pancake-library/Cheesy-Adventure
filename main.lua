@@ -8,8 +8,8 @@ function love.load()
 	pancake.smoothRender = true
 	--pancake.debugMode = true
 	loadAssets()
-	text = 0
-	level = 1
+	text = 4
+	level = 2
 	loadLevel(level)
 	pancake.background.image = pancake.images.background
 	left = pancake.addButton({key = "a", name="left",x = 1*pancake.window.pixelSize, y = love.graphics.getHeight()-16*pancake.window.pixelSize, width = 14, height = 14, scale = pancake.window.pixelSize})
