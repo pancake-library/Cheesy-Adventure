@@ -1354,51 +1354,51 @@ function defineLetters()
 	letters.b = {pix(11), pix(12), pix(13), pix(14), pix(22), pix(24), pix(33), width = 3}
 	letters.c = {pix(13), pix(22), pix(24), pix(32), pix(34), width = 3}
 	letters.d = {pix(13), pix(22), pix(24),pix(31), pix(32), pix(33), pix(34), width = 3}
-	letters.e = {pix(12), pix(13), pix(21), pix(22), pix(24), pix(32), width = 3}
-	letters.f = {pix(13), pix(21), pix(22), pix(23), pix(24), pix(31),pix(33), width = 3}
-	letters.g = {pix(12), pix(13), pix(21), pix(23), pix(31), pix(32), pix(33), pix(34), pix(25), pix(35), width = 3}
+	letters.e = {pix(12), pix(13), pix(14), pix(21), pix(23), pix(25), pix(32), pix(33), width = 3}
+	letters.f = {pix(13), pix(21), pix(22), pix(23), pix(24), pix(31),pix(33),pix(25), width = 3}
+	letters.g = {pix(12), pix(13), pix(14), pix(22), pix(24), pix(32), pix(33), pix(34), pix(35), pix(26), pix(36), width = 3}
 	letters.h = {pix(11), pix(12), pix(13), pix(14), pix(22), pix(33), pix(34),width = 3}
 	letters.i = {pix(11), pix(13), pix(14), width = 1}
 	letters.j = {pix(21), pix(23), pix(24), pix(14), width = 2}
 	letters.k = {pix(11), pix(12), pix(13), pix(14), pix(23), pix(32), pix(34), width = 3}
 	letters.l = {pix(11), pix(12), pix(13), pix(14), pix(24), width = 2}
-	letters.m = {pix(12), pix(13), pix(14), pix(23), pix(32), pix(33), pix(42), pix(43), pix(44), width = 4}
+	letters.m = {pix(13), pix(14), pix(22), pix(33), pix(42), pix(53), pix(54), width = 5}
 	letters.n = {pix(12), pix(13), pix(14), pix(22), pix(33), pix(34), width = 3}
 	letters.o = {pix(12), pix(13), pix(14), pix(22), pix(24), pix(32), pix(33), pix(34), width = 3}
-	letters.p = {pix(11), pix(12), pix(13), pix(14), pix(21), pix(23), pix(32), pix(33), width = 3}
+	letters.p = {pix(12), pix(13), pix(14), pix(15), pix(22), pix(24), pix(33), pix(34), width = 3}
 	letters.r = {pix(12), pix(13), pix(14), pix(23), pix(32), width = 3}
 	letters.s = {pix(12), pix(14), pix(21), pix(23), pix(24), width = 2}
 	letters.t = {pix(12), pix(21), pix(22), pix(23), pix(24), pix(32), width = 3}
-	letters.u = {pix(12), pix(13), pix(24), pix(32), pix(33), pix(34), width = 3}
+	letters.u = {pix(12), pix(13),pix(14), pix(24), pix(32), pix(33), pix(34), width = 3}
 	letters.v = {pix(12), pix(13), pix(24), pix(32), pix(33), width = 3}
-	letters.w = {pix(12), pix(13), pix(24), pix(33), pix(34), pix(42), pix(43), width = 4}
+	letters.w = {pix(12), pix(13), pix(24), pix(32), pix(33), pix(44), pix(52),pix(53), width = 5}
 	letters.x = {pix(12), pix(14), pix(23), pix(32), pix(34), width = 3}
-	letters.y = {pix(12), pix(13), pix(23), pix(24), pix(32), pix(33), width = 3}
+	letters.y = {pix(12), pix(13), pix(23), pix(24), pix(32), pix(33),pix(25), width = 3}
 	letters.z = {pix(11), pix(14), pix(21), pix(23), pix(24), pix(31), pix(34), pix(32), width = 3}
 	letters.A = {pix(12), pix(13), pix(14), pix(21), pix(23), pix(31), pix(33), pix(42), pix(43), pix(44), width = 4}
 	letters.B = {pix(12), pix(13), pix(14), pix(11), pix(21), pix(23), pix(24), pix(31), pix(32), pix(34), pix(43), pix(44), width = 4}
 	letters.C = {pix(12), pix(13), pix(21), pix(24), pix(31), pix(34), width = 3}
 	letters.D = {{x = 1, y = 2}, {x = 1, y = 3}, {x = 1, y = 4}, {x = 2, y = 1}, pix(24), pix(31), pix(34), pix(42), pix(43), pix(11), width = 4}
-	letters.E = {pix(12), pix(13), pix(14), pix(11), pix(21), pix(22), pix(24), pix(31), pix(32), pix(34), pix(41), pix(44),width = 4}
-	letters.F = {pix(12), pix(13), pix(14), pix(11), pix(21), pix(23), pix(31), pix(33), pix(41), width = 4}
+	letters.E = {pix(12), pix(13), pix(14), pix(11), pix(21), pix(22), pix(24), pix(31), pix(34),width = 3}
+	letters.F = {pix(12), pix(13), pix(14), pix(11), pix(21), pix(23), pix(31), width = 3}
 	letters.G = {pix(12), pix(13), pix(21), pix(24), pix(31), pix(34), pix(41), pix(43), pix(44), width = 4}
 	letters.H = {pix(11), pix(12), pix(13), pix(14), pix(22), pix(32), pix(41), pix(42), pix(43), pix(44), width = 4}
 	letters.I = {pix(11), pix(14), pix(21), pix(22), pix(23), pix(24), pix(31), pix(34),  width = 3}
 	letters.J = {pix(11), pix(13), pix(21), pix(24), pix(31), pix(34), pix(41), pix(42), pix(43), width = 4}
 	letters.K = {pix(11), pix(12), pix(13), pix(14), pix(23), pix(32), pix(33), pix(41), pix(44), width = 4}
 	letters.L = {pix(11), pix(12), pix(13), pix(14), pix(24), pix(34), pix(44), width = 4}
-	letters.M = {pix(11), pix(12), pix(13), pix(14), pix(22), pix(23),pix(32), pix(33), pix(41), pix(42), pix(43), pix(44), width = 4}
+	letters.M = {pix(11), pix(12), pix(13), pix(14), pix(22), pix(33),pix(42), pix(51), pix(52), pix(53), pix(54), width = 5}
 	letters.N = {pix(11), pix(12), pix(13), pix(14), pix(22), pix(33), pix(42), pix(43), pix(44), pix(41), width = 4}
 	letters.O = {pix(12), pix(13), pix(21), pix(24), pix(31), pix(34), pix(42), pix(43), width = 4}
 	letters.P = {pix(11), pix(12), pix(13), pix(14), pix(21), pix(23), pix(31), pix(33), pix(42), width = 4}
 	letters.R = {pix(11), pix(12), pix(13), pix(14), pix(21), pix(23), pix(31), pix(33), pix(42), pix(44),  width = 4}
 	letters.S = { pix(12), pix(14), pix(21), pix(22), pix(24), pix(31), pix(33), pix(34), pix(41), pix(43), pix(44), width = 4}
-	letters.T = {pix(11), pix(21), pix(22), pix(23), pix(24), pix(31), pix(32), pix(33), pix(34), pix(41),width = 4}
+	letters.T = {pix(11), pix(21), pix(22), pix(23), pix(24), pix(31),width = 3}
 	letters.U = {pix(11), pix(12), pix(13), pix(24), pix(34), pix(41), pix(42), pix(43), width = 4}
-	letters.V = {pix(11), pix(12), pix(13), pix(23), pix(24), pix(33), pix(34), pix(41), pix(42), pix(43), width = 4}
-	letters.W = {pix(11), pix(12), pix(13), pix(14), pix(23), pix(24), pix(33), pix(34), pix(41), pix(42), pix(43), pix(44), width = 4}
+	letters.V = {pix(11), pix(12), pix(13), pix(23), pix(24), pix(31), pix(32), pix(33), width = 3}
+	letters.W = {pix(11), pix(12), pix(13), pix(24), pix(33), pix(44), pix(51), pix(52), pix(53), width = 5}
 	letters.X = {pix(11), pix(14), pix(22), pix(23), pix(32), pix(33), pix(41), pix(44), width = 4}
-	letters.Y = {pix(11), pix(12), pix(23), pix(24), pix(33), pix(34), pix(41), pix(42), width = 4}
+	letters.Y = {pix(11), pix(12), pix(23), pix(24), pix(31), pix(32), width = 3}
 	letters.Z = {pix(11), pix(14), pix(21), pix(23), pix(24), pix(31), pix(32), pix(34), pix(41), pix(44), width = 4}
 	letters["!"]= {pix(11), pix(12), pix(14), width = 1}
 	letters.q = {pix(13), pix(14), pix(22), pix(24), pix(32), pix(33), pix(34), pix(35), width = 3}

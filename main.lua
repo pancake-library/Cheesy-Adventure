@@ -3,12 +3,12 @@ function love.load()
 	math.randomseed(os.time())
 	love.graphics.setBackgroundColor(0.1,0.1,0.1,1) --So it won't merge with pancake's background!!!
 	pancake.init({window = {pixelSize = love.graphics.getHeight()/96, width = 96, height = 96}}) --Initiating pancake and setting pixelSize, so that the pancake display will be the height of the window! pixelSize is how many pixels every pancake pixel should take
-	--pancake.loadAnimation = nil
-	--pancake.paused = false
+	pancake.loadAnimation = nil
+	pancake.paused = false
 	pancake.smoothRender = true
 	--pancake.debugMode = true
 	loadAssets()
-	text = nil
+	text = 12
 	level = 1
 	pancake.background.image = pancake.images.background
 	left = pancake.addButton({key = "a", name="left",x = 1*pancake.window.pixelSize, y = love.graphics.getHeight()-16*pancake.window.pixelSize, width = 14, height = 14, scale = pancake.window.pixelSize})
@@ -462,7 +462,7 @@ end
 
 function pancake.onLoad() -- This function will be called when pancake start up is done (after the animation)
 	pancake.pasue = true
-	text = 0
+	text = 15
 end
 
 function pancake.onOverlap(object1, object2, dt) -- This function will be called every time object "collides" with a non colliding object! Parameters: object1, object2 - objects of collision, dt - time of collision
@@ -628,8 +628,12 @@ function love.draw()
 		end
 	end
 	drawText()
+	love.graphics.setColor(1, 1, 1, 1)
+	--pancake.print("AaBbCcDdEeFfGgHhIiJjKkLl",0,0,scale)
+	--pancake.print("MmNnOoPpRrSsTtUuVvWwXxYyZz123467890!.",0, 7*scale,scale)
 	if pancake.debugMode then
-		pancake.print(love.timer.getFPS() .. "level "..level,0,0,3*scale)
+		love.graphics.setColor(1, 1, 1, 1)
+		pancake.print(love.timer.getFPS().. "FPS",0,0,2*scale)
 	end
 end
 
@@ -658,16 +662,16 @@ function drawText()
 			pancake.print("of the restaurant, was the", x+scale, y + 79*scale, scale)
 			pancake.print("only known person who", x+8*scale, y + 86*scale, scale)
 		elseif text == 1 then
-			pancake.print("knew how to make pizza in", x+4*scale, y + 1*scale, scale)
+			pancake.print("knew how to make pizza in", x+2*scale, y + 1*scale, scale)
 			pancake.print("the entire universe!", x+12*scale, y + 8*scale, scale)
 			love.graphics.draw(pancake.images.pizza,x+40*scale, y + 18*scale, 0, scale)
 			pancake.print("That is because only he", x+8*scale, y + 40*scale, scale)
 			pancake.print("knew how to make cheese. ", x+4*scale, y + 47*scale, scale)
 			pancake.print("He was known throughout", x+4*scale, y + 54*scale, scale)
 			pancake.print("the galaxy for his special", x+4*scale, y + 61*scale, scale)
-			pancake.print("cheese. Grown on the moons", x+scale, y + 68*scale, scale)
-			pancake.print("of planets over a long", x+10*scale, y + 75*scale, scale)
-			pancake.print("period of time.", x+20*scale, y + 82*scale, scale)
+			pancake.print("cheese. Grown on the moons", x+0*scale, y + 68*scale, scale)
+			pancake.print(" of planets over a long", x+8*scale, y + 75*scale, scale)
+			pancake.print("long period of time.", x+10*scale, y + 82*scale, scale)
 		elseif text == 3 then
 			pancake.print("However, Mr. Hutt died", x+8*scale, y + 3*scale, scale)
 			pancake.print("many years ago and the", x+8*scale, y + 10*scale, scale)
@@ -679,7 +683,7 @@ function drawText()
 			pancake.print("knowledge and only", x+13*scale, y + 52*scale, scale)
 			pancake.print("possibility to recover", x+10*scale, y + 59*scale, scale)
 			pancake.print("cheese recipe!", x+22*scale, y + 66*scale, scale)
-			pancake.print("THIS PLANET IS             ...", x+2*scale, y + 83*scale, scale)
+			pancake.print("THIS PLANET IS              ...", x+1*scale, y + 83*scale, scale)
 			love.graphics.setColor(0, 1, 0, 1)
 			pancake.print("EARTH", x+65*scale, y + 83*scale, scale)
 		elseif text == 4 then
@@ -717,35 +721,35 @@ function drawText()
 		elseif text == 7 then
 			love.graphics.draw(pancake.images.page, x, y, 0, scale)
 			love.graphics.setColor(0.4, 0.3, 0.2, 1)
-			pancake.print("Hutt again, today I have ", x+1*scale, y + 2*scale, scale)
+			pancake.print("Hutt again, today I have ", x+4*scale, y + 2*scale, scale)
 			pancake.print("noticed that humans have", x+3*scale, y + 9*scale, scale)
 			pancake.print("their own way to make", x+10*scale, y + 16*scale, scale)
-			pancake.print("cheese. How ironic.. anyway,", x+0*scale, y + 23*scale, scale)
+			pancake.print("cheese. How ironic. Anyway,", x+0*scale, y + 23*scale, scale)
 			pancake.print("I named this galaxy Milky", x+4*scale, y + 30*scale, scale)
 			pancake.print(" Way for a reason and it", x+3*scale, y + 37*scale, scale)
 			pancake.print("was supposed to be the ", x+4*scale, y + 44*scale, scale)
 			pancake.print("biggest cheese warehouse", x+3*scale, y + 51*scale, scale)
 			pancake.print("in the entire universe, but", x+3*scale, y + 58*scale, scale)
-			pancake.print("it seems like all my hope is", x+5*scale, y + 65*scale, scale)
+			pancake.print("it seems like all my hope is", x+2*scale, y + 65*scale, scale)
 			pancake.print("lost, I am stuck here", x+6*scale, y + 72*scale, scale)
 			pancake.print("forever. There is a human", x+2*scale, y + 80*scale, scale)
 			pancake.print("base on the west though!", x+3*scale, y + 87*scale, scale)
 		elseif text == 8 then
 			love.graphics.draw(pancake.images.page, x, y, 0, scale)
 			love.graphics.setColor(0.4, 0.3, 0.2, 1)
-			pancake.print("I am about starve to death. ", x+1*scale, y + 2*scale, scale)
+			pancake.print("I am about starve to death. ", x+0*scale, y + 2*scale, scale)
 			pancake.print("Funny, considering I am on", x+3*scale, y + 9*scale, scale)
 			pancake.print("something that is huge and", x+2*scale, y + 16*scale, scale)
-			pancake.print("was suppose to be food...", x+4*scale, y + 23*scale, scale)
-			pancake.print("I want the universe to know", x+0*scale, y + 30*scale, scale)
-			pancake.print("HOW TO CRAFT CHEESE", x+5*scale, y + 37*scale, scale)
-			pancake.print("and only I know how to do it ", x+0*scale, y + 44*scale, scale)
+			pancake.print("was suppose to be food... I", x+3*scale, y + 23*scale, scale)
+			pancake.print("want the universe to know", x+2*scale, y + 30*scale, scale)
+			pancake.print("HOW TO CRAFT CHEESE and", x+2*scale, y + 37*scale, scale)
+			pancake.print("only I know how to do it  ", x+2*scale, y + 44*scale, scale)
 			pancake.print("for now. Well, humans too.", x+3*scale, y + 51*scale, scale)
 			pancake.print("If I die here, go and seek", x+4*scale, y + 58*scale, scale)
-			pancake.print("for their base on the west", x+5*scale, y + 65*scale, scale)
-			pancake.print("side of this moon.", x+20*scale, y + 72*scale, scale)
-			pancake.print("P.S. I am dying, you are", x+10*scale, y + 80*scale, scale)
-			pancake.print("the only hope for cheese!", x+5*scale, y + 87*scale, scale)
+			pancake.print("for their base on the west", x+3*scale, y + 65*scale, scale)
+			pancake.print("side of this moon.", x+18*scale, y + 72*scale, scale)
+			pancake.print("P.S. I am dying, you are", x+8*scale, y + 80*scale, scale)
+			pancake.print("the only hope for cheese!", x+3*scale, y + 87*scale, scale)
 		elseif text == 9 then
 			pancake.print("I have to get back to my", x+5*scale, y + 30*scale, scale)
 			pancake.print("ship! - said our hero -", x+8*scale, y + 37*scale, scale)
@@ -756,16 +760,16 @@ function drawText()
 			pancake.print("Recipe hunger", x+24*scale, y + 50*scale, scale)
 		elseif text == 10 then
 			pancake.print("After returning to his", x+8*scale, y + 27*scale, scale)
-			pancake.print("ship, he grabbed his", x+14*scale, y + 34*scale, scale)
-			pancake.print("trusty pocket time stopper.", x+0*scale, y + 41*scale, scale)
+			pancake.print("ship, he grabbed his trusty", x+2*scale, y + 34*scale, scale)
+			pancake.print("pocket time stopper.", x+10*scale, y + 41*scale, scale)
 			pancake.print("Press J to stop time!", x+12*scale, y + 60*scale, scale)
 		elseif text == 12 then
 			love.graphics.draw(pancake.images.page, x, y, 0, scale)
 			love.graphics.setColor(0.4, 0.3, 0.2, 1)
 			pancake.print("Cheese:", x+24*scale, y + 12*scale, 2*scale)
 			pancake.print("To craft a cheese you take", x+2*scale, y + 30*scale, scale)
-			pancake.print("some milk and then do stuff", x+1*scale, y + 37*scale, scale)
-			pancake.print("with it...", x+30*scale, y + 44*scale, scale)
+			pancake.print("some milk and then do", x+12*scale, y + 37*scale, scale)
+			pancake.print("stuff with it...", x+22*scale, y + 44*scale, scale)
 			pancake.print("Milk is a liquid that", x+16*scale, y + 51*scale, scale)
 			pancake.print("comes out of cow. Cow", x+12*scale, y + 58*scale, scale)
 			pancake.print("is an animal from Earth.", x+9*scale, y + 65*scale, scale)
