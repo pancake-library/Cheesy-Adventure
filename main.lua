@@ -6,10 +6,10 @@ function love.load()
 	pancake.loadAnimation = nil
 	--pancake.paused = false
 	pancake.smoothRender = true
-	--pancake.debugMode = true
+	pancake.debugMode = true
 	loadAssets()
-	text = 4
-	level = 2
+	text = 10
+	level = 3
 	loadLevel(level)
 	pancake.background.image = pancake.images.background
 	left = pancake.addButton({key = "a", name="left",x = 1*pancake.window.pixelSize, y = love.graphics.getHeight()-16*pancake.window.pixelSize, width = 14, height = 14, scale = pancake.window.pixelSize})
@@ -89,11 +89,60 @@ function loadLevel(level)
 		pancake.addObject({name = "fake_ground", image = "ground", x = 200, y = -40, width = 8*8, height = 5*8, textured = true, texture = {width = 8, height = 8}})
 	elseif level == 3 then
 		loadGroundLevel()
+		alien.safePlace = {x = -15, y = -10}
+		alien.x = -15
+		alien.y = -10
+		alien.x = -490
+		alien.y = -220
+		alien.flippedX = true
+		pancake.addObject({name = "ship", image = "ship", x = -10, y = -14, width = 14, height = 10})
+		rectangle(-560,0,78,6)
+		pancake.changeAnimation(pancake.addObject({name = "astronaut", image = "ship", x = -70, y = -12, width = 30, height = 12, offsetY = -1}), "idle")
+		pancake.changeAnimation(pancake.addObject({name = "astronaut", image = "ship", x = -120, y = -12, width = 30, height = 12, offsetY = -1}), "idle")
+		pancake.changeAnimation(pancake.addObject({name = "astronaut", image = "ship", x = -157, y = -12, width = 30, height = 12, offsetY = -1}), "idle")
+		rectangle(-300, -8, 8, 1, "steel")
+		pancake.addObject({name = "door", image = "door", x = -252, y = -24, width = 30, height = 15, offsetX = 12})
+		rectangle(-300, -32, 8, 1, "steel")
+		pancake.addObject({name = "door", image = "door", x = -300, y = -24, width = 30, height = 15, offsetX = 12})
+		local rock2 = pancake.applyPhysics(pancake.addObject({name = "rock2", image = "ground", x = -312, y = -100, width = 8, height = 8, colliding = true}))
+		rock2.velocityY = 30
+		rectangle(-340, -56, 1, 4, "steel")
+		rectangle(-340-9*8, -8, 11, 1, "steel")
+		pancake.addObject({name = "closed_door", image = "door", x = -331, y = -24, width = 6, height = 16,colliding = true})
+		rectangle(-300, -94, 9, 1, "steel")
+		rectangle(-300+5*8, -94-8*8, 4, 8, "steel")
+		pancake.addObject({image = "code",x = -244, y = -136, width = 1, height = 1})
+		pancake.addObject({name = "passcard",image = "passcard",x = -275, y = -110, width = 7, height = 11})
+		rectangle(-340-64, -56, 2, 1, "steel")
+		rectangle(-340-64+24, -56, 5, 1, "steel")
+		rectangle(-340-64, -56+24, 7, 1, "steel")
+		pancake.addObject({name = "terminal",image = "terminal",x = -365, y = -42, width = 5, height = 10})
+		pancake.addObject({name = "closed_door",image = "door",x = -345, y = -48, width = 6, height = 16,colliding = true})
+		pancake.changeAnimation(pancake.addObject({name = "astronaut", image = "ship", x = -270, y = -20, width = 30, height = 12, offsetY = -1}), "idle")
+		pancake.changeAnimation(pancake.addObject({name = "astronaut", image = "ship", x = -396, y = -44, width = 30, height = 12, offsetY = -1}), "idle")
+		rectangle(-340-72, -56-8*8, 1, 12, "steel")
+		pancake.addObject({name = "button3",image = "button3",x = -355, y = -28, width = 7, height = 7})
+		pancake.addObject({name = "button2",image = "button2",x = -370, y = -28, width = 7, height = 7})
+		pancake.addObject({name = "button1",image = "button1",x = -385, y = -28, width = 7, height = 7})
+		pancake.addObject({name = "closed_door2",image = "door",x = -402, y = -24, width = 6, height = 16,colliding = true})
+		rectangle(-456,-200, 1, 22, "steel")
+		rectangle(-496,-200, 1, 25, "steel")
+		for i = 0, 9 do
+			rectangle(-488,-16-i*20, 1, 1, "steel")
+		end
+		rectangle(-456,-200-32, 1, 4, "steel")
+		rectangle(-456-10*8,-200-32, 10, 1, "steel")
+		rectangle(-456-10*8,-200, 5, 1, "steel")
+		rectangle(-456-11*8,-200-32, 1, 5, "steel")
+		pancake.addObject({name = "safePlace", x = -480, y = -205, width = 8, height = 8})
+		pancake.changeAnimation(pancake.addObject({name = "page", x = -527, y = -209, width = 8, height = 8}), "idle")
+		pancake.changeAnimation(pancake.addObject({name = "astronaut", image = "ship", x = -517, y = -213, width = 30, height = 12, offsetY = -1}), "idle")
 	end
 end
 
-function rectangle(x, y, width, height)
-	return pancake.addObject({name = "ground", image = "ground", x = x+8, y = y, width = width*8, height = height*8, colliding = true, textured = true, texture = {width = 8, height = 8}})
+function rectangle(x, y, width, height, texture)
+	local texture = texture or "ground"
+	return pancake.addObject({name = "ground", image = texture, x = x+8, y = y, width = width*8, height = height*8, colliding = true, textured = true, texture = {width = 8, height = 8}})
 end
 
 function spike(x,y,length,type)
@@ -110,6 +159,7 @@ function killAlien()
 	alien.y = alien.safePlace.y
 	alien.velocityX = 0
 	alien.velocityY = 0
+	pancake.playSound("death")
 end
 
 function loadAssets()
@@ -119,6 +169,9 @@ function loadAssets()
 	pancake.addAnimation("alien","idle","images/animations",180)
 	pancake.addAnimation("alien","run","images/animations",150)
 	pancake.addAnimation("page","idle","images/animations",200)
+	pancake.addAnimation("astronaut","idle","images/animations",150)
+	pancake.addAnimation("timewave","idle","images/animations",230)
+	pancake.addAnimation("timewave","in","images/animations",230)
 	--Adding buttons
 	pancake.addImage("right", "images/ui")
 	pancake.addImage("right_clicked", "images/ui")
@@ -150,12 +203,24 @@ function loadAssets()
 	pancake.addImage("jump_pad", "images")
 	pancake.addImage("easter_egg", "images")
 	pancake.addImage("page", "images")
+	pancake.addImage("door", "images")
+	pancake.addImage("steel", "images")
+	pancake.addImage("blank", "images")
+	pancake.addImage("code", "images")
+	pancake.addImage("passcard", "images")
+	pancake.addImage("terminal", "images")
+	pancake.addImage("button1", "images")
+	pancake.addImage("button2", "images")
+	pancake.addImage("button3", "images")
 	--sounds
 	pancake.addSound("laser")
 	pancake.addSound("success")
 	pancake.addSound("crash")
 	pancake.addSound("boom")
 	pancake.addSound("next")
+	pancake.addSound("death")
+	pancake.addSound("timestop")
+	pancake.addSound("timestart")
 	--music
 	chapter1 = love.audio.newSource("music/chapter1.ogg", "stream")
 	chapter1:setLooping(true)
@@ -222,6 +287,19 @@ function centerPressed()
 				pancake.paused = false
 			end
 		end
+	elseif level == 3 and not alien.timeStopped and text == nil then
+		alien.timeStopped = true
+		local timeWave = pancake.addObject({name = "timewave",x = alien.x-6, y = alien.y-7,width = 10, height = 10})
+		pancake.changeAnimation(timeWave, "idle")
+		pancake.addTimer(900, "single",deleteTimeWave, timeWave)
+		pancake.addTimer(2200, "single",startTime)
+		pancake.playSound("timestop")
+		pancake.addTimer(1300, "single",createStartWave)
+		for i = 1, #pancake.objects do
+			if pancake.objects[i].name ~= "alien" then
+				pancake.objects[i].physics = false
+			end
+		end
 	end
 	if text == 2 then
 		text = nil
@@ -260,7 +338,31 @@ function centerPressed()
 	elseif text == 11 then
 		text = nil
 		pancake.paused = false
+	elseif text == 12 then
+		text = nil
+		pancake.paused = false
 	end
+end
+
+function deleteTimeWave(object)
+	pancake.trash(pancake.objects, object.ID, "ID")
+end
+
+function startTime()
+	alien.timeStopped = false
+	for i = 1, #pancake.objects do
+		local object = pancake.objects[i]
+		if object.name == "rock2" then
+			object.physics = true
+			object.velocityY = 30
+		end
+	end
+end
+function createStartWave()
+	local timeWave = pancake.addObject({name = "timewave",x = alien.x-6, y = alien.y-7,width = 10, height = 10})
+	pancake.changeAnimation(timeWave, "in")
+	pancake.addTimer(900, "single",deleteTimeWave, timeWave)
+	pancake.playSound("timestart")
 end
 
 function createAsteroid(x,y,number)
@@ -319,6 +421,14 @@ function pancake.onCollision(object1, object2, axis, direction, sc) --This funct
 		if object1.name == "alien" then
 			killAlien()
 		end
+	elseif object1.name == "rock2" and not alien.timeStopped then
+		pancake.trash(pancake.objects, object1.ID, "ID")
+		local rock2 = pancake.applyPhysics(pancake.addObject({name = "rock2", image = "ground", x = -312, y = -100, width = 8, height = 8, colliding = true}))
+		rock2.velocityY = 10
+	elseif object2.name == "rock2"and not alien.timeStopped  then
+		pancake.trash(pancake.objects, object2.ID, "ID")
+		local rock2 = pancake.applyPhysics(pancake.addObject({name = "rock2", image = "ground", x = -312, y = -100, width = 8, height = 8, colliding = true}))
+		rock2.velocityY = 10
 	end
 end
 
@@ -370,30 +480,82 @@ function pancake.onOverlap(object1, object2, dt) -- This function will be called
 			alien.safePlace.x = object2.x
 			alien.safePlace.y = object2.y
 		elseif object1.name == "alien" and object2.name == "page" then
-			pancake.trash(pancake.objects, object2.ID, "ID")
-			alien.pages = alien.pages + 1
 			pancake.playSound("success")
-			if alien.pages == 1 then
+			pancake.trash(pancake.objects, object2.ID, "ID")
+			if level == 2 then
+				alien.pages = alien.pages + 1
+				if alien.pages == 1 then
+					pancake.paused = true
+					text = 6
+				elseif alien.pages == 2 then
+					pancake.paused = true
+					text = 7
+				elseif alien.pages == 3 then
+					pancake.paused = true
+					text = 8
+				end
+			elseif level == 3 then
 				pancake.paused = true
-				text = 6
-			elseif alien.pages == 2 then
-				pancake.paused = true
-				text = 7
-			elseif alien.pages == 3 then
-				pancake.paused = true
-				text = 8
+				text = 12
+				alien.recipe = true
 			end
 		elseif object1.name == "alien" and object2.name == "jump_pad" then
 			alien.y = alien.y - 1
 			alien.velocityY = -80
 		elseif object1.name == "alien" and object2.name == "fake_ground" then
 			pancake.trash(pancake.objects, object2.ID, "ID")
-		elseif object1.name == "alien" and object2.name == "ship" and alien.pages == 3 then
-			pancake.paused = true
-			text = 10
-			if chapter2 then
-				chapter2:pause()
-				chapter2 = nil
+		elseif object1.name == "alien" and object2.name == "ship" then
+			if level == 2 and alie.pages == 3 then
+				pancake.paused = true
+				text = 10
+				if chapter2 then
+					chapter2:pause()
+					chapter2 = nil
+				end
+			elseif level == 3 and alien.recipe then
+				pancake.paused = true
+				text = 13
+				if chapter3 then
+					chapter3:pause()
+					chapter3 = nil
+				end
+			end
+		elseif object1.name == "alien" and object2.name == "astronaut" then
+			if not alien.timeStopped then
+				killAlien()
+			end
+		elseif object1.name == "alien" and object2.name == "door" and object2.image ~= "blank" then
+			object2.image = "blank"
+			pancake.playSound("next")
+		elseif object1.name == "alien" and object2.name == "passcard" then
+			pancake.trash(pancake.objects, object2.ID, "ID")
+			pancake.playSound("success")
+			alien.passcard = true
+		elseif object1.name == "alien" and object2.name == "terminal" and alien.passcard then
+			pancake.trash(pancake.objects, "closed_door", "name")
+			pancake.trash(pancake.objects, "closed_door", "name")
+			pancake.playSound("next")
+			alien.passcard = false
+		elseif object1.name == "alien" and object2.name == "button3" then
+			pancake.playSound("next")
+			alien.button3 = true
+		elseif object1.name == "alien" and object2.name == "button1" then
+			pancake.playSound("next")
+			if alien.button3 then
+				alien.button1 = true
+			else
+				alien.button3 = nil
+				killAlien()
+			end
+		elseif object1.name == "alien" and object2.name == "button2" then
+			pancake.playSound("next")
+			if alien.button3 and alien.button1 then
+				alien.button2 = true
+				pancake.trash(pancake.objects, "closed_door2", "name")
+			else
+				alien.button3 = nil
+				alien.button1 = nil
+				killAlien()
 			end
 		end
 	end
@@ -562,6 +724,16 @@ function drawText()
 			pancake.print("After returning to his", x+8*scale, y + 37*scale, scale)
 			pancake.print("ship, he grabbed his", x+14*scale, y + 44*scale, scale)
 			pancake.print("trusty pocket time stopper.", x+0*scale, y + 51*scale, scale)
+		elseif text == 12 then
+			love.graphics.draw(pancake.images.page, x, y, 0, scale)
+			love.graphics.setColor(0.4, 0.3, 0.2, 1)
+			pancake.print("Cheese:", x+24*scale, y + 12*scale, 2*scale)
+			pancake.print("To craft a cheese you take", x+2*scale, y + 30*scale, scale)
+			pancake.print("some milk and then do stuff", x+1*scale, y + 37*scale, scale)
+			pancake.print("with it...", x+30*scale, y + 44*scale, scale)
+			pancake.print("Milk is a liquid that", x+16*scale, y + 51*scale, scale)
+			pancake.print("comes out of cow. Cow", x+12*scale, y + 58*scale, scale)
+			pancake.print("is an animal from Earth.", x+9*scale, y + 65*scale, scale)
 		end
 	end
 end
@@ -626,14 +798,22 @@ function love.update(dt)
 				end
 			end
 		end
-		if alien.x < 0 then
+		if alien.x < 0 and level == 2 then
 			alien.x = 0
 			alien.velocityX = 0
-		elseif alien.x > 1000 then
-			alien.x = 1000
+		elseif alien.x > 0 and level == 3 then
+			alien.x = 0
 			alien.velocityX = 0
 		end
-
+		if level == 3 then
+			if alien.timeStopped then
+				for i = 1, #pancake.objects do
+					if pancake.objects[i].name == "astronaut" then
+						pancake.objects[i].image = "astronaut_idle1"
+					end
+				end
+			end
+		end
 	end
 end
 
