@@ -8,8 +8,8 @@ function love.load()
 	pancake.smoothRender = true
 	--pancake.debugMode = true
 	loadAssets()
-	text = 12
-	level = 1
+	text = 4
+	level = 2
 	pancake.background.image = pancake.images.background
 	left = pancake.addButton({key = "a", name="left",x = 1*pancake.window.pixelSize, y = love.graphics.getHeight()-16*pancake.window.pixelSize, width = 14, height = 14, scale = pancake.window.pixelSize})
 	right = pancake.addButton({key = "d", name="right",x = 17*pancake.window.pixelSize, y = love.graphics.getHeight()-16*pancake.window.pixelSize, width = 14, height = 14, scale = pancake.window.pixelSize})
@@ -59,7 +59,7 @@ function loadLevel(stage)
 		pancake.addObject({name = "ground", image = "ground", x = 140, y = 107, width = 8, height = 8, colliding = true})
 		pancake.addObject({name = "ground", image = "ground", x = 104, y = 90, width = 8, height = 8, colliding = true})
 		rock1 = pancake.applyPhysics(pancake.addObject({name = "rock1", image = "ground", x = 148, y = 107, width = 8, height = 8, colliding = true}))
-		rock1.mass = 9999
+		rock1.mass = 999999999
 		rock1.velocityX = 10
 		pancake.addForce(rock1, {time = "infinite",  y = -pancake.physics.gravityY, relativeToMass = true})
 		pancake.addObject({name = "ground", image = "ground", x = 330, y = 117, width = 8, height = 8, colliding = true})
