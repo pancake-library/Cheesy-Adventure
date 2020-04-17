@@ -152,6 +152,9 @@ function loadLevel(stage)
 		pancake.changeAnimation(pancake.addObject({name = "page", x = -527, y = -209, width = 8, height = 8}), "idle")
 		pancake.changeAnimation(pancake.addObject({name = "astronaut", image = "ship", x = -517, y = -212, width = 30, height = 12}), "idle")
 		pancake.addObject({name = "safePlace", x = -390, y = -17, width = 8, height = 8})
+	elseif level == 4 then
+		level = 4
+		loadTestLevel()
 	end
 end
 
@@ -229,6 +232,7 @@ function loadAssets()
 	pancake.addImage("button3", "images")
 	pancake.addImage("red_laser", "images")
 	pancake.addImage("heart", "images")
+	pancake.addImage("Gun", "images")
 	--sounds
 	pancake.addSound("laser")
 	pancake.addSound("success")
@@ -286,6 +290,11 @@ function loadShipLevel()--level is a number of the level. This function loads ev
 	for i =1, 6 do
 		pancake.addObject({name = "fuel", image = "fuel", x=i*350, y = math.random(0,80), width = 7, height = 9})
 	end
+end
+
+function loadTestLevel()
+	pancake.debugMode = true
+	guy = pancake.applyPhysics(pancake.addObject({name = "guy", x = 15, y = 70, width = 5, height = 9, offsetX = -5, offsetY = -5, colliding = true}))
 end
 
 function decreaseFuel()
