@@ -294,7 +294,7 @@ end
 
 function loadTestLevel()
 	pancake.debugMode = true
-	guy = pancake.applyPhysics(pancake.addObject({name = "guy", x = 15, y = 70, width = 5, height = 9, offsetX = -5, offsetY = -5, colliding = true}))
+	alien = pancake.applyPhysics(pancake.addObject({name = "alien", x = 15, y = 70, width = 5, height = 9, offsetX = -5, offsetY = -5, colliding = true}))
 end
 
 function decreaseFuel()
