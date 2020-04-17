@@ -3,7 +3,7 @@ function love.load()
 	math.randomseed(os.time())
 	love.graphics.setBackgroundColor(0.1,0.1,0.1,1) --So it won't merge with pancake's background!!!
 	pancake.init({window = {pixelSize = love.graphics.getHeight()/96, width = 96, height = 96}}) --Initiating pancake and setting pixelSize, so that the pancake display will be the height of the window! pixelSize is how many pixels every pancake pixel should take
-	--pancake.loadAnimation = nil
+	pancake.loadAnimation = nil
 	--pancake.paused = true
 	pancake.smoothRender = true
 	--pancake.debugMode = true
@@ -16,6 +16,10 @@ function love.load()
 	up = pancake.addButton({key = "w", name="up",x = love.graphics.getWidth()-15*pancake.window.pixelSize, y = love.graphics.getHeight()-16*pancake.window.pixelSize, width = 14, height = 14, scale = pancake.window.pixelSize})
 	down = pancake.addButton({key = "s", name="down",x = love.graphics.getWidth()-31*pancake.window.pixelSize, y = love.graphics.getHeight()-16*pancake.window.pixelSize, width = 14, height = 14, scale = pancake.window.pixelSize})
 	center = pancake.addButton({func = centerPressed, key = "j", name="center",x = love.graphics.getWidth()-15*pancake.window.pixelSize, y = love.graphics.getHeight()-31*pancake.window.pixelSize, width = 14, height = 14, scale = pancake.window.pixelSize})
+	level = 3
+	loadLevel(3)
+	alien.recipe = true
+	pancake.paused = false
 end
 
 function loadLevel(stage)
@@ -666,7 +670,7 @@ function pancake.onOverlap(object1, object2, dt) -- This function will be called
 			damageShip()
 		elseif object1.name == "apple" and object2.name == "ground" then
 			pancake.trash(pancake.objects, object1.ID, "ID")
-		elseif object1.name == "ship" and object2.name == "cow" then
+		elseif object1.name == "ship" and object2.name == "cow" and text == nil then
 			if farmer.sleep then
 				text = 15
 				pancake.paused = true
@@ -708,14 +712,14 @@ function pancake.onOverlap(object1, object2, dt) -- This function will be called
 		elseif object1.name == "alien" and object2.name == "fake_ground" then
 			pancake.trash(pancake.objects, object2.ID, "ID")
 		elseif object1.name == "alien" and object2.name == "ship" then
-			if level == 2 and alien.pages == 3 then
+			if level == 2 and alien.pages == 3 and text == nil then
 				pancake.paused = true
 				text = 10
 				if chapter2 then
 					chapter2:pause()
 					chapter2 = nil
 				end
-			elseif level == 3 and alien.recipe then
+			elseif level == 3 and alien.recipe and text == nil then
 				pancake.paused = true
 				text = 13
 				if chapter3 then
