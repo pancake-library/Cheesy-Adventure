@@ -152,6 +152,9 @@ function loadLevel(stage)
 		pancake.changeAnimation(pancake.addObject({name = "page", x = -527, y = -209, width = 8, height = 8}), "idle")
 		pancake.changeAnimation(pancake.addObject({name = "astronaut", image = "ship", x = -517, y = -212, width = 30, height = 12, offsetY = -1}), "idle")
 		pancake.addObject({name = "safePlace", x = -390, y = -17, width = 8, height = 8})
+	elseif level == 4 then
+		level = 4
+		loadTestLevel()
 	end
 end
 
