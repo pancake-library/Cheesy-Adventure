@@ -4,7 +4,7 @@ function love.load()
 	love.graphics.setBackgroundColor(0.1,0.1,0.1,1) --So it won't merge with pancake's background!!!
 	pancake.init({window = {pixelSize = love.graphics.getHeight()/96, width = 96, height = 96}}) --Initiating pancake and setting pixelSize, so that the pancake display will be the height of the window! pixelSize is how many pixels every pancake pixel should take
 	--pancake.loadAnimation = nil
-	--pancake.paused = false
+	--pancake.paused = true
 	pancake.smoothRender = true
 	--pancake.debugMode = true
 	loadAssets()
@@ -26,6 +26,11 @@ function loadLevel(stage)
 		pancake.addObject({image = "earth", x = 1990, y = 43, width = 10, height = 10, layer = 2, name = "earth"})
 		pancake.paused = true
 		text = 0
+		for w = 2, 100 do
+			for i = 1, 5 do
+				pancake.applyForce(createAsteroid(math.random(w*25,w*25+25), math.random(0,80), math.random(1,2)),{x=-math.random(0,7), y = math.random(-4,4), relativeToMass = true},1)
+			end
+		end
 	elseif level == 2 then
 		level = 2
 		loadGroundLevel()
@@ -152,6 +157,77 @@ function loadLevel(stage)
 		pancake.changeAnimation(pancake.addObject({name = "page", x = -527, y = -209, width = 8, height = 8}), "idle")
 		pancake.changeAnimation(pancake.addObject({name = "astronaut", image = "ship", x = -517, y = -212, width = 30, height = 12}), "idle")
 		pancake.addObject({name = "safePlace", x = -390, y = -17, width = 8, height = 8})
+	elseif level == 4 then
+		loadShipLevel()
+		ship.lives = 5
+		rectangle(-40, 90, 305, 2, "grass")
+		farmer = pancake.applyPhysics(pancake.addObject({name = "farmer", x = 20, y = 78, width = 8, height = 12, offsetX = -4, offsetY = -2}))
+		pancake.changeAnimation(farmer, "run")
+		ship.velocityX = 35
+		farmer.velocityX = 35
+		farmer.lives = 5
+		pancake.cameraFollow = farmer
+		pancake.addTimer(7000, "single", farmerAttack)
+		pancake.addTimer(300, "single", sendABird)
+		generateTrees()
+		cow = pancake.addObject({name = "cow", image = "cow", x = 0, y = 0, width = 16, height = 10})
+		pancake.changeAnimation(cow, "run")
+	end
+end
+
+function generateTrees()
+	for i = 1, 50 do
+		local random = math.random(1, 3)
+		if random == 1 then
+			pancake.addObject({name = "tree", image = "tree1",x = i*200, y = 73, width = 15, height = 11, offsetX = -7, offsetY = -15})
+			pancake.addObject({name = "apple", image = "apple",x = i*200+7, y = 73+1, width = 2, height = 3})
+		elseif random == 2 then
+			pancake.addObject({name = "tree",image = "tree2",x = i*200, y = 67, width = 16, height = 11, offsetX = -7, offsetY = -9})
+			pancake.addObject({name = "apple", image = "apple",x = i*200+7, y = 67+1, width = 2, height = 3})
+		elseif random == 3 then
+			pancake.addObject({name = "tree",image = "tree3",x = i*200, y = 58, width = 16, height = 11, offsetX = -7, offsetY = 0})
+			pancake.addObject({name = "apple", image = "apple",x = i*200+7, y = 58+1, width = 2, height = 3})
+		end
+	end
+end
+
+function farmerAttack()
+	if not farmer.sleep then
+		pancake.changeAnimation(farmer, "shoot")
+		pancake.addTimer(1000, "single", farmerStopAttack)
+		pancake.addTimer(100, "single", farmerShoot)
+		pancake.addTimer(400, "single", farmerShoot)
+		pancake.addTimer(700, "single", farmerShoot)
+		farmer.velocityX = 0
+		farmer.flippedX = true
+	end
+end
+
+function farmerShoot()
+	if not farmer.sleep then
+		local bullet = pancake.applyPhysics(pancake.addObject({name = "bullet", image = "bullet", x = farmer.x - 1, y = farmer.y, width = 3, height = 3}))
+		local xDistance = farmer.x - ship.x
+		local yDistance = math.abs(farmer.y - ship.y)
+		bullet.velocityX = -xDistance/math.sqrt(xDistance*xDistance + yDistance*yDistance)*50
+		bullet.velocityY = -yDistance/math.sqrt(xDistance*xDistance + yDistance*yDistance)*50
+	end
+end
+
+function farmerStopAttack()
+	if not farmer.sleep then
+		pancake.addTimer(7000, "single", farmerAttack)
+		pancake.changeAnimation(farmer, "run")
+		farmer.velocityX = 35
+		farmer.flippedX = false
+	end
+end
+
+function sendABird()
+	if not farmer.sleep then
+		local bird = pancake.applyPhysics(pancake.addObject({name = "bird", y = math.random(0, 60), x = farmer.x + math.random(100, 150), width = 7, height = 5}))
+		pancake.changeAnimation(bird, "fly")
+		bird.velocityX = -math.random(15, 25)
+		pancake.addTimer(1200, "single", sendABird)
 	end
 end
 
@@ -187,6 +263,11 @@ function loadAssets()
 	pancake.addAnimation("astronaut","idle","images/animations",150)
 	pancake.addAnimation("timewave","idle","images/animations",230)
 	pancake.addAnimation("timewave","in","images/animations",230)
+	pancake.addAnimation("farmer","run","images/animations",110)
+	pancake.addAnimation("farmer","shoot","images/animations",200)
+	pancake.addAnimation("bird","fly","images/animations",200)
+	pancake.addAnimation("cow","run","images/animations",120)
+	pancake.addAnimation("farmer","sleep","images/animations",100)
 	--Adding buttons
 	pancake.addImage("right", "images/ui")
 	pancake.addImage("right_clicked", "images/ui")
@@ -229,6 +310,13 @@ function loadAssets()
 	pancake.addImage("button3", "images")
 	pancake.addImage("red_laser", "images")
 	pancake.addImage("heart", "images")
+	pancake.addImage("grass", "images")
+	pancake.addImage("tree1", "images")
+	pancake.addImage("tree2", "images")
+	pancake.addImage("tree3", "images")
+	pancake.addImage("apple", "images")
+	pancake.addImage("little_heart", "images")
+	pancake.addImage("bullet", "images")
 	--sounds
 	pancake.addSound("laser")
 	pancake.addSound("success")
@@ -249,6 +337,12 @@ function loadAssets()
 	chapter3 = love.audio.newSource("music/chapter3.ogg", "stream")
 	chapter3:setLooping(true)
 	chapter3:setVolume(1.3)
+	chapter4 = love.audio.newSource("music/chapter4.ogg", "stream")
+	chapter4:setLooping(true)
+	chapter4:setVolume(1.3)
+	chapter5 = love.audio.newSource("music/chapter5.ogg", "stream")
+	chapter5:setLooping(true)
+	chapter5:setVolume(1.3)
 end
 
 function loadGroundLevel()
@@ -278,11 +372,10 @@ function loadShipLevel()--level is a number of the level. This function loads ev
 	ship.lives = 3
 	ship.fuel = 10
 	ship.fuelTimer = pancake.addTimer(4000, "repetetive", decreaseFuel)
-	for w = 2, 100 do
-		for i = 1, 5 do
-			pancake.applyForce(createAsteroid(math.random(w*25,w*25+25), math.random(0,80), math.random(1,2)),{x=-math.random(0,7), y = math.random(-4,4), relativeToMass = true},1)
-		end
-	end
+	generateFuel()
+end
+
+function generateFuel()
 	for i =1, 6 do
 		pancake.addObject({name = "fuel", image = "fuel", x=i*350, y = math.random(0,80), width = 7, height = 9})
 	end
@@ -305,7 +398,7 @@ function centerPressed()
 				pancake.paused = false
 			end
 		end
-	elseif level == 3 and not alien.timeStopped and text == nil and alien.timeStopper then
+	elseif level == 3 and alien and not alien.timeStopped and text == nil and alien.timeStopper then
 		alien.timeStopped = true
 		local timeWave = pancake.addObject({name = "timewave",x = alien.x-6, y = alien.y-7,width = 10, height = 10})
 		pancake.changeAnimation(timeWave, "idle")
@@ -362,6 +455,19 @@ function centerPressed()
 	elseif text == 12 then
 		text = nil
 		pancake.paused = false
+	elseif text == 13 then
+		text = 14
+		chapter4:play()
+	elseif text == 14 then
+		level = 4
+		loadLevel(4)
+		text = nil
+		pancake.paused = false
+	elseif text == 15 then
+		chapter5:play()
+		text = 16
+	elseif text == 16 then
+		text = nil
 	end
 end
 
@@ -478,29 +584,33 @@ end
 
 
 function pancake.onLoad() -- This function will be called when pancake start up is done (after the animation)
-	pancake.pasue = true
+	pancake.pause = true
 	text = 0
+end
+
+function damageShip()
+	if not ship.invulnerable then
+		ship.invulnerable = true
+		ship.lives = ship.lives - 1
+		pancake.shakeScreen(10, 4)
+		pancake.playSound("crash")
+		if ship.lives <= 0 then
+			ship.animation = nil
+			ship.image = nil
+			ship.dead = true
+			ship.velocityX = 0
+			ship.velocityY = 0
+		else
+			pancake.changeAnimation(ship, "crash")
+			pancake.addTimer(2000, "single", idleShip)
+		end
+	end
 end
 
 function pancake.onOverlap(object1, object2, dt) -- This function will be called every time object "collides" with a non colliding object! Parameters: object1, object2 - objects of collision, dt - time of collision
 	if levelType == "ship" then
 		if object1.name == "ship" and object2.name == "asteroid" then
-			if not ship.invulnerable then
-				ship.invulnerable = true
-				ship.lives = ship.lives - 1
-				pancake.shakeScreen(10, 4)
-				pancake.playSound("crash")
-				if ship.lives <= 0 then
-					ship.animation = nil
-					ship.image = nil
-					ship.dead = true
-					ship.velocityX = 0
-					ship.velocityY = 0
-				else
-					pancake.changeAnimation(ship, "crash")
-					pancake.addTimer(2000, "single", idleShip)
-				end
-			end
+			damageShip()
 		elseif object1.name == "laser" and object2.name == "asteroid" then
 			pancake.trash(pancake.objects, object1.ID, "ID")
 			pancake.trash(pancake.objects, object2.ID, "ID")
@@ -518,6 +628,48 @@ function pancake.onOverlap(object1, object2, dt) -- This function will be called
 				chapter1 = nil
 			end
 			pancake.paused = true
+		elseif object1.name == "ship" and object2.name == "ground" then
+			damageShip()
+		elseif object1.name == "ship" and object2.name == "bird" then
+			damageShip()
+		elseif object1.name == "ship" and object2.name == "tree" then
+			damageShip()
+		elseif object1.name == "laser" and object2.name == "apple" then
+			pancake.applyPhysics(object2)
+			object2.velocityY = 100
+		elseif object1.name == "apple" and object2.name == "farmer" then
+			if not farmer.invulnerable then
+				farmer.lives = farmer.lives - 1
+				farmer.invulnerable = true
+				pancake.addTimer(1000, "single", farmerHittable)
+				pancake.shakeScreen()
+				pancake.playSound("crash")
+				if farmer.lives == 0 then
+					pancake.changeAnimation(farmer, "sleep")
+					farmer.offsetY = farmer.offsetY + 5
+					farmer.sleep = true
+					farmer.velocityX = 0
+					pancake.cameraFollow = ship
+				end
+			end
+			pancake.trash(pancake.objects, object1.ID, "ID")
+		elseif object1.name == "laser" and object2.name == "bird" then
+			pancake.trash(pancake.objects, object2.ID, "ID")
+			pancake.trash(pancake.objects, object1.ID, "ID")
+		elseif object1.name == "bullet" and object2.name == "ship" then
+			pancake.trash(pancake.objects, object1.ID, "ID")
+			damageShip()
+		elseif object1.name == "apple" and object2.name == "ground" then
+			pancake.trash(pancake.objects, object1.ID, "ID")
+		elseif object1.name == "ship" and object2.name == "cow" then
+			if farmer.sleep then
+				text = 15
+				pancake.paused = true
+				if chapter4 then
+					chapter4:pause()
+					chapter4 = nil
+				end
+			end
 		end
 	elseif levelType == "ground" then
 		if object1.name == "alien" and object2.name == "spike" then
@@ -612,6 +764,10 @@ function pancake.onOverlap(object1, object2, dt) -- This function will be called
 	end
 end
 
+function farmerHittable()
+	farmer.invulnerable = false
+end
+
 function idleShip()
 	if ship.animation then
 		pancake.changeAnimation(ship, "idle")
@@ -625,12 +781,21 @@ function love.draw()
 	local scale = pancake.window.pixelSize
 	pancake.draw() --Sets the canvas right! If pancake.autoDraw is set to true (which is its default state) the canvas will be automatically drawn on the window x and y
 	if levelType == "ship" and text == nil then
+		if level == 4 then
+			if farmer.invulnerable then
+				for i = 1, farmer.lives do
+					love.graphics.draw(pancake.images.little_heart, x + 40*scale+4*i*scale, y + 70*scale, 0, scale)
+				end
+			end
+		end
 		if ship.lives > 0 then
 			for i = 1, ship.lives do
 				love.graphics.draw(pancake.images.heart, x + 96*scale - i*12*scale, y + 1*scale, 0, scale)
 			end
 		end
-		pancake.print(pancake.round(2000 - ship.x) .. "m", pancake.window.x, pancake.window.y, scale)
+		if not level == 4 then
+			pancake.print(pancake.round(2000 - ship.x) .. "m", pancake.window.x, pancake.window.y, scale)
+		end
 		love.graphics.rectangle("fill" , x + 90*scale, y + 84*scale, 3*scale, 10*scale)
 		love.graphics.setColor(1, 0, 0, 1)
 		love.graphics.rectangle("fill" , x + 90*scale, y + (94 - ship.fuel)*scale, 3*scale, 12*scale)
@@ -796,15 +961,24 @@ function drawText()
 			pancake.print("comes out of cow. Cow", x+12*scale, y + 58*scale, scale)
 			pancake.print("is an animal from Earth.", x+9*scale, y + 65*scale, scale)
 		elseif text == 13 then
-			love.graphics.draw(pancake.images.page, x, y, 0, scale)
-			love.graphics.setColor(0.4, 0.3, 0.2, 1)
-			pancake.print("Cheese:", x+24*scale, y + 12*scale, 2*scale)
-			pancake.print("To craft a cheese you take", x+2*scale, y + 30*scale, scale)
-			pancake.print("some milk and then do", x+12*scale, y + 37*scale, scale)
-			pancake.print("stuff with it...", x+22*scale, y + 44*scale, scale)
-			pancake.print("Milk is a liquid that", x+16*scale, y + 51*scale, scale)
-			pancake.print("comes out of cow. Cow", x+12*scale, y + 58*scale, scale)
-			pancake.print("is an animal from Earth.", x+9*scale, y + 65*scale, scale)
+			pancake.print("Well, I guess it is time to", x+4*scale, y + 23*scale, scale)
+			pancake.print("go on Earth and search for", x+2*scale, y + 30*scale, scale)
+			pancake.print("the cows now - tought our", x+2*scale, y + 37*scale, scale)
+			pancake.print("hero. The whole procces", x+6*scale, y + 44*scale, scale)
+			pancake.print("was very funny though, so", x+4*scale, y + 51*scale, scale)
+			pancake.print("you are gonna play it ", x+12*scale, y + 58*scale, scale)
+			pancake.print("yourself.", x+33*scale, y + 65*scale, scale)
+		elseif text == 14 then
+			pancake.print("Chapter 4", x+16*scale, y + 26*scale, scale*2)
+			pancake.print("On the Milky Way", x+18*scale, y + 50*scale, scale)
+		elseif text == 15 then
+			pancake.print("With the cow on his ship", x+8*scale, y + 37*scale, scale)
+			pancake.print("our hero decided to return", x+2*scale, y + 44*scale, scale)
+			pancake.print("to his home galaxy in order", x+2*scale, y + 51*scale, scale)
+			pancake.print("to start a pizza business.", x+6*scale, y + 58*scale, scale)
+		elseif text == 16 then
+			pancake.print("Chapter 5", x+16*scale, y + 26*scale, scale*2)
+			pancake.print("Homecoming", x+26*scale, y + 50*scale, scale)
 		end
 	end
 end
@@ -814,6 +988,39 @@ function love.update(dt)
 	if levelType == "ship" then
 		pancake.window.offsetY = 0 --So that our ship is followed only on x coordinate!
 		pancake.window.offsetX = pancake.window.offsetX + 24
+		if level == 4 then
+			cow.x = farmer.x + 18
+			cow.y = farmer.y + 1
+			if ship.x < farmer.x - 55 then
+				ship.x = farmer.x - 55
+				if ship.velocityX < 35 then
+					ship.velocityX = 35
+				end
+			elseif ship.x > farmer.x + 30 then
+				ship.x = farmer.x + 30
+				ship.velocityX = 35
+			end
+			pancake.window.offsetX = pancake.window.offsetX - 30
+			for i = 2, #pancake.objects do
+				local object = pancake.objects[i]
+				if object.x + object.width + 1 < farmer.x - 50 then
+						pancake.trash(pancake.objects, object.ID, "ID")
+				end
+			end
+			if farmer.x > 1800 then
+				for i = 1, #pancake.objects do
+					local object = pancake.objects[i]
+					if object.name ~= "ground" then
+						object.x = object.x - 1500
+					end
+					if object.name == "fuel" or object.name == "tree" and object.name == "apple" then
+						pancake.trash(pancake.objects, object.ID, "ID")
+					end
+				end
+				generateTrees()
+				generateFuel()
+			end
+		end
 		if pancake.isButtonClicked(left) and not ship.dead and ship.fuel > 0 then
 			pancake.applyForce(ship, {x = -40, relativeToMass = true})
 			ship.flippedX = true
