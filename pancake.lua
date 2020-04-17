@@ -856,14 +856,20 @@ function collide(object1, objects, axis, direction, sc, oa) --sc is a short for 
 	--call custom collision function!
 	for i = 1, #objects do
 		object2 = objects[i]
+		local ret = true
 		if not didTheyCollide(object1, object2) then
 			if pancake.onCollision then
-				pancake.onCollision(object1, object2, axis, direction, sc)
+				ret = pancake.onCollision(object1, object2, axis, direction, sc)
+				if ret == nil then
+					ret = true
+				end
 			end
-			local force2 = pancake.getCollisionForces(object1, object2, axis, direction, sc)[2]
-			collisions[#collisions + 1] = {object = object2, force = force2}
-			forceSum.x = forceSum.x + pancake.getCollisionForces(object1, object2, axis, direction, sc)[1].x
-			forceSum.y = forceSum.y + pancake.getCollisionForces(object1, object2, axis, direction, sc)[1].y
+			if ret then
+				local force2 = pancake.getCollisionForces(object1, object2, axis, direction, sc)[2]
+				collisions[#collisions + 1] = {object = object2, force = force2}
+				forceSum.x = forceSum.x + pancake.getCollisionForces(object1, object2, axis, direction, sc)[1].x
+				forceSum.y = forceSum.y + pancake.getCollisionForces(object1, object2, axis, direction, sc)[1].y
+			end
 			if not object2.collidedWith then
 				object2.collidedWith = {}
 			end
