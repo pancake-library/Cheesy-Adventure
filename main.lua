@@ -6,9 +6,9 @@ function love.load()
 	pancake.loadAnimation = nil
 	pancake.paused = false
 	pancake.smoothRender = true
-	--pancake.debugMode = true
+	pancake.debugMode = true
 	loadAssets()
-	text = 4
+	text = 10
 	level = 2
 	pancake.background.image = pancake.images.background
 	left = pancake.addButton({key = "a", name="left",x = 1*pancake.window.pixelSize, y = love.graphics.getHeight()-16*pancake.window.pixelSize, width = 14, height = 14, scale = pancake.window.pixelSize})
@@ -107,9 +107,9 @@ function loadLevel(stage)
 		alien.flippedX = true
 		pancake.addObject({name = "ship", image = "ship", x = -10, y = -14, width = 14, height = 10})
 		rectangle(-560,0,78,6)
-		pancake.changeAnimation(pancake.addObject({name = "astronaut", image = "ship", x = -70, y = -12, width = 30, height = 12, offsetY = -1}), "idle")
-		pancake.changeAnimation(pancake.addObject({name = "astronaut", image = "ship", x = -120, y = -12, width = 30, height = 12, offsetY = -1}), "idle")
-		pancake.changeAnimation(pancake.addObject({name = "astronaut", image = "ship", x = -157, y = -12, width = 30, height = 12, offsetY = -1}), "idle")
+		pancake.changeAnimation(pancake.addObject({name = "astronaut", x = -70, y = -12, width = 30, height = 12}), "idle")
+		pancake.changeAnimation(pancake.addObject({name = "astronaut", x = -120, y = -12, width = 30, height = 12}), "idle")
+		pancake.changeAnimation(pancake.addObject({name = "astronaut", x = -157, y = -12, width = 30, height = 12}), "idle")
 		rectangle(-300, -8, 8, 1, "steel")
 		pancake.addObject({name = "door", image = "door", x = -252, y = -24, width = 30, height = 15, offsetX = 12})
 		rectangle(-300, -32, 8, 1, "steel")
@@ -128,8 +128,8 @@ function loadLevel(stage)
 		rectangle(-340-64, -56+24, 7, 1, "steel")
 		pancake.addObject({name = "terminal",image = "terminal",x = -365, y = -42, width = 5, height = 10})
 		pancake.addObject({name = "closed_door",image = "door",x = -345, y = -48, width = 6, height = 16,colliding = true})
-		pancake.changeAnimation(pancake.addObject({name = "astronaut", image = "ship", x = -270, y = -20, width = 30, height = 12, offsetY = -1}), "idle")
-		pancake.changeAnimation(pancake.addObject({name = "astronaut", image = "ship", x = -396, y = -44, width = 30, height = 12, offsetY = -1}), "idle")
+		pancake.changeAnimation(pancake.addObject({name = "astronaut", image = "ship", x = -270, y = -20, width = 30, height = 12}), "idle")
+		pancake.changeAnimation(pancake.addObject({name = "astronaut", image = "ship", x = -396, y = -44, width = 30, height = 12}), "idle")
 		rectangle(-340-72, -56-8*8, 1, 12, "steel")
 		pancake.addObject({name = "button3",image = "button3",x = -355, y = -28, width = 7, height = 7})
 		pancake.addObject({name = "button2",image = "button2",x = -370, y = -28, width = 7, height = 7})
@@ -150,14 +150,14 @@ function loadLevel(stage)
 		rectangle(-456-11*8,-200-32, 1, 5, "steel")
 		pancake.addObject({name = "safePlace", x = -454, y = -205, width = 8, height = 8})
 		pancake.changeAnimation(pancake.addObject({name = "page", x = -527, y = -209, width = 8, height = 8}), "idle")
-		pancake.changeAnimation(pancake.addObject({name = "astronaut", image = "ship", x = -517, y = -212, width = 30, height = 12, offsetY = -1}), "idle")
+		pancake.changeAnimation(pancake.addObject({name = "astronaut", image = "ship", x = -517, y = -212, width = 30, height = 12}), "idle")
 		pancake.addObject({name = "safePlace", x = -390, y = -17, width = 8, height = 8})
 	end
 end
 
 function rectangle(x, y, width, height, texture)
 	local texture = texture or "ground"
-	return pancake.addObject({name = "ground", image = texture, x = x+8, y = y, width = width*8, height = height*8, colliding = true, textured = true, texture = {width = 8, height = 8}})
+	return pancake.addObject({name = texture, image = texture, x = x+8, y = y, width = width*8, height = height*8, colliding = true, textured = true, texture = {width = 8, height = 8}})
 end
 
 function spike(x,y,length,type)
@@ -421,18 +421,30 @@ function deleteLaser(laser)
 end
 
 function pancake.onCollision(object1, object2, axis, direction, sc) --This function will be called whenever a physic object collides with a colliding object!
-	if object1.name == "rock1" and axis == "x" then
-		pancake.trash(pancake.objects, object1.ID, "ID")
-		rock1 = pancake.applyPhysics(pancake.addObject({name = "rock1", image = "ground", x = 148, y = 107, width = 8, height = 8, colliding = true}))
-		rock1.mass = 9999
-		rock1.velocityX = 10
-		pancake.addForce(rock1, {time = "infinite",  y = -pancake.physics.gravityY, relativeToMass = true})
-	elseif object2.name == "rock1" and axis == "x" then
-		pancake.trash(pancake.objects, object2.ID, "ID")
-		rock1 = pancake.applyPhysics(pancake.addObject({name = "rock1", image = "ground", x = 148, y = 107, width = 8, height = 8, colliding = true}))
-		rock1.mass = 9999
-		rock1.velocityX = 10
-		pancake.addForce(rock1, {time = "infinite",  y = -pancake.physics.gravityY, relativeToMass = true})
+	if object1.name == "rock1" then
+		if axis == "x" then
+			pancake.trash(pancake.objects, object1.ID, "ID")
+			rock1 = pancake.applyPhysics(pancake.addObject({name = "rock1", image = "ground", x = 148, y = 107, width = 8, height = 8, colliding = true}))
+			rock1.mass = 9999
+			rock1.velocityX = 10
+			pancake.addForce(rock1, {time = "infinite",  y = -pancake.physics.gravityY, relativeToMass = true})
+		end
+		if object2.name == "alien" then
+			object2.velocityY = 0
+		end
+		return false
+	elseif object2.name == "rock1" then
+		if axis == "x" then
+			pancake.trash(pancake.objects, object2.ID, "ID")
+			rock1 = pancake.applyPhysics(pancake.addObject({name = "rock1", image = "ground", x = 148, y = 107, width = 8, height = 8, colliding = true}))
+			rock1.mass = 9999
+			rock1.velocityX = 10
+			pancake.addForce(rock1, {time = "infinite",  y = -pancake.physics.gravityY, relativeToMass = true})
+		end
+		if object1.name == "alien" then
+			object1.velocityY = 0
+		end
+		return false
 	elseif object1.name == "spike1" and axis == "y" then
 		if axis == "y" then
 			pancake.trash(pancake.objects, object1.ID, "ID")
@@ -457,8 +469,12 @@ function pancake.onCollision(object1, object2, axis, direction, sc) --This funct
 		pancake.trash(pancake.objects, object2.ID, "ID")
 		local rock2 = pancake.applyPhysics(pancake.addObject({name = "rock2", image = "ground", x = -312, y = -100, width = 8, height = 8, colliding = true}))
 		rock2.velocityY = 10
+	elseif object1.name == "alien" and object2.name == "steel" and axis == "x" then
+		alien.velocityX = 0
+		return false
 	end
 end
+
 
 function pancake.onLoad() -- This function will be called when pancake start up is done (after the animation)
 	pancake.pasue = true
