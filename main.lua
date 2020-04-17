@@ -291,6 +291,10 @@ function loadShipLevel()--level is a number of the level. This function loads ev
 	end
 end
 
+function loadTestLevel()
+	pancake.debugMode = true
+end
+
 function decreaseFuel()
 	ship.fuel = ship.fuel - 1
 	if ship.fuel <= 0 then
