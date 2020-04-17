@@ -298,6 +298,9 @@ end
 function loadTestLevel()
 	pancake.debugMode = true
 	alien = pancake.applyPhysics(pancake.addObject({name = "alien", x = 15, y = 70, width = 5, height = 9, offsetX = -5, offsetY = -5, colliding = true}))
+	for i = 0, 3 do
+		pancake.addObject({x = x + i*8, y = y, image = "ground", colliding = true, width = 8, height = 8})
+	end
 end
 
 function decreaseFuel()
