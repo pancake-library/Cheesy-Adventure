@@ -228,6 +228,7 @@ function loadAssets()
 	pancake.addImage("button2", "images")
 	pancake.addImage("button3", "images")
 	pancake.addImage("red_laser", "images")
+	pancake.addImage("Gun", "images")
 	--sounds
 	pancake.addSound("laser")
 	pancake.addSound("success")
