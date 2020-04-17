@@ -381,6 +381,11 @@ function generateFuel()
 	end
 end
 
+function loadTestLevel()
+	pancake.debugMode = true
+	guy = pancake.applyPhysics(pancake.addObject({name = "guy", x = 15, y = 70, width = 5, height = 9, offsetX = -5, offsetY = -5, colliding = true}))
+end
+
 function decreaseFuel()
 	ship.fuel = ship.fuel - 1
 	if ship.fuel <= 0 then
