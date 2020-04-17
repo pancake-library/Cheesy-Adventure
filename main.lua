@@ -3,13 +3,13 @@ function love.load()
 	math.randomseed(os.time())
 	love.graphics.setBackgroundColor(0.1,0.1,0.1,1) --So it won't merge with pancake's background!!!
 	pancake.init({window = {pixelSize = love.graphics.getHeight()/96, width = 96, height = 96}}) --Initiating pancake and setting pixelSize, so that the pancake display will be the height of the window! pixelSize is how many pixels every pancake pixel should take
-	pancake.loadAnimation = nil
-	pancake.paused = false
+	--pancake.loadAnimation = nil
+	--pancake.paused = false
 	pancake.smoothRender = true
-	pancake.debugMode = true
+	--pancake.debugMode = true
 	loadAssets()
-	text = 10
-	level = 2
+	text = nil
+	level = 1
 	pancake.background.image = pancake.images.background
 	left = pancake.addButton({key = "a", name="left",x = 1*pancake.window.pixelSize, y = love.graphics.getHeight()-16*pancake.window.pixelSize, width = 14, height = 14, scale = pancake.window.pixelSize})
 	right = pancake.addButton({key = "d", name="right",x = 17*pancake.window.pixelSize, y = love.graphics.getHeight()-16*pancake.window.pixelSize, width = 14, height = 14, scale = pancake.window.pixelSize})
@@ -157,7 +157,7 @@ end
 
 function rectangle(x, y, width, height, texture)
 	local texture = texture or "ground"
-	return pancake.addObject({name = texture, image = texture, x = x+8, y = y, width = width*8, height = height*8, colliding = true, textured = true, texture = {width = 8, height = 8}})
+	return pancake.addObject({name = "ground", image = texture, x = x+8, y = y, width = width*8, height = height*8, colliding = true, textured = true, texture = {width = 8, height = 8}})
 end
 
 function spike(x,y,length,type)
@@ -228,6 +228,7 @@ function loadAssets()
 	pancake.addImage("button2", "images")
 	pancake.addImage("button3", "images")
 	pancake.addImage("red_laser", "images")
+	pancake.addImage("heart", "images")
 	--sounds
 	pancake.addSound("laser")
 	pancake.addSound("success")
@@ -469,7 +470,7 @@ function pancake.onCollision(object1, object2, axis, direction, sc) --This funct
 		pancake.trash(pancake.objects, object2.ID, "ID")
 		local rock2 = pancake.applyPhysics(pancake.addObject({name = "rock2", image = "ground", x = -312, y = -100, width = 8, height = 8, colliding = true}))
 		rock2.velocityY = 10
-	elseif object1.name == "alien" and object2.name == "steel" and axis == "x" then
+	elseif object1.name == "alien" and object2.name == "ground" and axis == "x" then
 		alien.velocityX = 0
 		return false
 	end
@@ -478,7 +479,7 @@ end
 
 function pancake.onLoad() -- This function will be called when pancake start up is done (after the animation)
 	pancake.pasue = true
-	text = 15
+	text = 0
 end
 
 function pancake.onOverlap(object1, object2, dt) -- This function will be called every time object "collides" with a non colliding object! Parameters: object1, object2 - objects of collision, dt - time of collision
@@ -624,6 +625,11 @@ function love.draw()
 	local scale = pancake.window.pixelSize
 	pancake.draw() --Sets the canvas right! If pancake.autoDraw is set to true (which is its default state) the canvas will be automatically drawn on the window x and y
 	if levelType == "ship" and text == nil then
+		if ship.lives > 0 then
+			for i = 1, ship.lives do
+				love.graphics.draw(pancake.images.heart, x + 96*scale - i*12*scale, y + 1*scale, 0, scale)
+			end
+		end
 		pancake.print(pancake.round(2000 - ship.x) .. "m", pancake.window.x, pancake.window.y, scale)
 		love.graphics.rectangle("fill" , x + 90*scale, y + 84*scale, 3*scale, 10*scale)
 		love.graphics.setColor(1, 0, 0, 1)
@@ -780,6 +786,16 @@ function drawText()
 			pancake.print("pocket time stopper.", x+10*scale, y + 41*scale, scale)
 			pancake.print("Press J to stop time!", x+12*scale, y + 60*scale, scale)
 		elseif text == 12 then
+			love.graphics.draw(pancake.images.page, x, y, 0, scale)
+			love.graphics.setColor(0.4, 0.3, 0.2, 1)
+			pancake.print("Cheese:", x+24*scale, y + 12*scale, 2*scale)
+			pancake.print("To craft a cheese you take", x+2*scale, y + 30*scale, scale)
+			pancake.print("some milk and then do", x+12*scale, y + 37*scale, scale)
+			pancake.print("stuff with it...", x+22*scale, y + 44*scale, scale)
+			pancake.print("Milk is a liquid that", x+16*scale, y + 51*scale, scale)
+			pancake.print("comes out of cow. Cow", x+12*scale, y + 58*scale, scale)
+			pancake.print("is an animal from Earth.", x+9*scale, y + 65*scale, scale)
+		elseif text == 13 then
 			love.graphics.draw(pancake.images.page, x, y, 0, scale)
 			love.graphics.setColor(0.4, 0.3, 0.2, 1)
 			pancake.print("Cheese:", x+24*scale, y + 12*scale, 2*scale)
