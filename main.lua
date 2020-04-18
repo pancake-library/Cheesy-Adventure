@@ -6,20 +6,16 @@ function love.load()
 	pancake.loadAnimation = nil
 	--pancake.paused = true
 	pancake.smoothRender = true
-	--pancake.debugMode = true
+	pancake.debugMode = true
 	loadAssets()
-	text = nil
-	level = 1
+	text = 15
+	level = 3
 	pancake.background.image = pancake.images.background
 	left = pancake.addButton({key = "a", name="left",x = 1*pancake.window.pixelSize, y = love.graphics.getHeight()-16*pancake.window.pixelSize, width = 14, height = 14, scale = pancake.window.pixelSize})
 	right = pancake.addButton({key = "d", name="right",x = 17*pancake.window.pixelSize, y = love.graphics.getHeight()-16*pancake.window.pixelSize, width = 14, height = 14, scale = pancake.window.pixelSize})
 	up = pancake.addButton({key = "w", name="up",x = love.graphics.getWidth()-15*pancake.window.pixelSize, y = love.graphics.getHeight()-16*pancake.window.pixelSize, width = 14, height = 14, scale = pancake.window.pixelSize})
 	down = pancake.addButton({key = "s", name="down",x = love.graphics.getWidth()-31*pancake.window.pixelSize, y = love.graphics.getHeight()-16*pancake.window.pixelSize, width = 14, height = 14, scale = pancake.window.pixelSize})
 	center = pancake.addButton({func = centerPressed, key = "j", name="center",x = love.graphics.getWidth()-15*pancake.window.pixelSize, y = love.graphics.getHeight()-31*pancake.window.pixelSize, width = 14, height = 14, scale = pancake.window.pixelSize})
-	level = 3
-	loadLevel(3)
-	alien.recipe = true
-	pancake.paused = false
 end
 
 function loadLevel(stage)
@@ -176,6 +172,11 @@ function loadLevel(stage)
 		generateTrees()
 		cow = pancake.addObject({name = "cow", image = "cow", x = 0, y = 0, width = 16, height = 10})
 		pancake.changeAnimation(cow, "run")
+	elseif level == 5 then
+		loadGroundLevel()
+		alien.x = 40
+		alien.y = -30
+		rectangle(0,0, 10, 10, "steel")
 	end
 end
 
@@ -473,10 +474,14 @@ function centerPressed()
 		text = nil
 		pancake.paused = false
 	elseif text == 15 then
+		pancake.pasued = true
 		chapter5:play()
 		text = 16
 	elseif text == 16 then
 		text = nil
+		level = 5
+		loadLevel(5)
+		pancake.paused = false
 	end
 end
 
@@ -985,6 +990,8 @@ function drawText()
 			pancake.print("our hero decided to return", x+2*scale, y + 44*scale, scale)
 			pancake.print("to his home galaxy in order", x+2*scale, y + 51*scale, scale)
 			pancake.print("to start a pizza business.", x+6*scale, y + 58*scale, scale)
+			pancake.print("Hower, he got attacked by", x+6*scale, y + 65*scale, scale)
+			pancake.print("a space pirate: Jack Pigeon!", x+6*scale, y + 65*scale, scale)
 		elseif text == 16 then
 			pancake.print("Chapter 5", x+16*scale, y + 26*scale, scale*2)
 			pancake.print("Homecoming", x+26*scale, y + 50*scale, scale)
@@ -1061,6 +1068,9 @@ function love.update(dt)
 
 	--GROUND
 	elseif levelType == "ground" then
+		if level == 4 then
+			pancake.window.offsetX = 0
+		end
 		if pancake.isButtonClicked(left) then
 			pancake.applyForce(alien, {x = -70, relativeToMass = true})
 			alien.flippedX = true
