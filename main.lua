@@ -3,13 +3,13 @@ function love.load()
 	math.randomseed(os.time())
 	love.graphics.setBackgroundColor(0.1,0.1,0.1,1) --So it won't merge with pancake's background!!!
 	pancake.init({window = {pixelSize = love.graphics.getHeight()/96, width = 96, height = 96}}) --Initiating pancake and setting pixelSize, so that the pancake display will be the height of the window! pixelSize is how many pixels every pancake pixel should take
-	pancake.loadAnimation = nil
+	--pancake.loadAnimation = nil
 	--pancake.paused = true
 	pancake.smoothRender = true
-	pancake.debugMode = true
+	--pancake.debugMode = true
 	loadAssets()
-	text = 15
-	level = 3
+	text = nil
+	level = 1
 	pancake.background.image = pancake.images.background
 	left = pancake.addButton({key = "a", name="left",x = 1*pancake.window.pixelSize, y = love.graphics.getHeight()-16*pancake.window.pixelSize, width = 14, height = 14, scale = pancake.window.pixelSize})
 	right = pancake.addButton({key = "d", name="right",x = 17*pancake.window.pixelSize, y = love.graphics.getHeight()-16*pancake.window.pixelSize, width = 14, height = 14, scale = pancake.window.pixelSize})
@@ -181,8 +181,8 @@ function loadLevel(stage)
 		alien.timeStopper = true
 		alien.x = 40
 		alien.y = -30
-		alien.x = 9
-		alien.y = -184
+		--alien.x = 76
+		--alien.y = -200
 		rectangle(-8,0, 12, 6, "steel")
 		rectangle(-8,-800, 1, 100, "steel")
 		rectangle(80,-800, 1, 100, "steel")
@@ -199,12 +199,41 @@ function loadLevel(stage)
 		pirate = pancake.addObject({y = -211, x = 76, flippedX = true, name = "pirate", width = 8, height = 11, offsetX =-2})
 		pancake.changeAnimation(pirate, "idle")
 		pirate.waiting = true
+		pirate.lives = 7
+		pirate.invulnerable = false
+		alien.lives = 5
 	end
+end
+
+function damagePirate()
+	if not pirate.invulnerable and not pirate.dead then
+		pancake.shakeScreen()
+		pirate.lives = pirate.lives - 1
+		pirate.invulnerable = true
+		pancake.addTimer(2000, "single", pirateHittable)
+		if pirate.lives == 0 then
+			pirate.dead = true
+			pirate.offsetY = 4
+			pancake.changeAnimation(pirate, "dead")
+			pirate.physics = false
+			pireta.colliding = false
+			for i = 1, #pancake.objects do
+				local object = pancake.objects[i]
+				if object.name == "barrel" then
+					pancake.trash(pancake.objects, object.ID, "ID")
+				end
+			end
+		end
+	end
+end
+
+function pirateHittable()
+	pirate.invulnerable = false
 end
 
 function dropBarrel()
 	local tryBarrel = {colliding = true, name = "barrel", image = "barrel",x = math.random(16,60), y = -280, width = 6, height = 7}
-	if not pancake.isObjectColliding(tryBarrel) and not alien.timeStopped then
+	if not pancake.isObjectColliding(tryBarrel) and not alien.timeStopped and not pirate.dead then
 		local barrel = pancake.applyPhysics(pancake.addObject(tryBarrel))
 		pancake.addForce(barrel, {time = "infinite",  y = -pancake.physics.gravityY, relativeToMass = true})
 		barrel.velocityY = 40
@@ -251,7 +280,7 @@ function farmerShoot()
 	if not farmer.sleep then
 		local bullet = pancake.applyPhysics(pancake.addObject({name = "bullet", image = "bullet", x = farmer.x - 1, y = farmer.y, width = 3, height = 3}))
 		local xDistance = farmer.x - ship.x
-		local yDistance = math.abs(farmer.y - ship.y)
+		local yDistance = math.abs(farmer.y - ship.y+3)
 		bullet.velocityX = -xDistance/math.sqrt(xDistance*xDistance + yDistance*yDistance)*50
 		bullet.velocityY = -yDistance/math.sqrt(xDistance*xDistance + yDistance*yDistance)*50
 	end
@@ -312,7 +341,8 @@ function loadAssets()
 	pancake.addAnimation("bird","fly","images/animations",200)
 	pancake.addAnimation("cow","run","images/animations",120)
 	pancake.addAnimation("farmer","sleep","images/animations",100)
-	pancake.addAnimation("pirate","idle","images/animations",100)
+	pancake.addAnimation("pirate","idle","images/animations",210)
+	pancake.addAnimation("pirate","dead","images/animations",210)
 	--Adding buttons
 	pancake.addImage("right", "images/ui")
 	pancake.addImage("right_clicked", "images/ui")
@@ -451,7 +481,7 @@ function centerPressed()
 				pancake.paused = false
 			end
 		end
-	elseif (level == 3 or level == 5) and alien and not alien.timeStopped and text == nil and alien.timeStopper then
+	elseif (level == 3 or level == 5) and alien and not alien.timeStopped and text == nil and alien.timeStopper and alien.lives ~= 0 then
 		alien.timeStopped = true
 		local timeWave = pancake.addObject({name = "timewave",x = alien.x-6, y = alien.y-7,width = 10, height = 10})
 		pancake.changeAnimation(timeWave, "idle")
@@ -465,6 +495,17 @@ function centerPressed()
 			if pancake.objects[i].name ~= "alien" then
 				pancake.objects[i].physics = false
 			end
+		end
+	end
+	if level == 5 and alien.lives == 0 then
+		if pirate.waiting then
+			loadLevel(5)
+			pancake.paused = false
+		else
+			loadLevel(5)
+			pancake.paused = false
+			alien.x = 76
+			alien.y = -200
 		end
 	end
 	if text == 2 then
@@ -553,6 +594,8 @@ function startTime()
 			object.physics = true
 		elseif object.name == "bullet" then
 			object.physics = true
+		elseif object.name == "pirate" then
+			pancake.changeAnimation(object, "idle")
 		end
 	end
 end
@@ -650,10 +693,20 @@ function pancake.onCollision(object1, object2, axis, direction, sc) --This funct
 		local explosion = pancake.addObject({name = "explosion", image = "explosion", x = object2.x - 4, y = object2.y - 4, width = 13, height = 13})
 		pancake.addTimer(100, "single", deleteObject, explosion)
 		pancake.trash(pancake.objects, object2.ID, "ID")
-	elseif object2.name == "pirate" and not alien.timeStopped and axis == "x" then
-		object2.velocityX = 0
-	elseif object1.name == "pirate" and not alien.timeStopped and axis == "x" then
-		object1.velocityY = 0
+	elseif object2.name == "pirate" and not alien.timeStopped then
+		if axis == "x" then
+			object2.velocityY = 0
+		end
+		if object1.name == "alien" then
+			damageAlien()
+		end
+	elseif object1.name == "pirate" and not alien.timeStopped then
+		if axis == "x" then
+			object1.velocityY = 0
+		end
+		if object2.name == "alien" then
+			damageAlien()
+		end
 	end
 end
 
@@ -680,6 +733,25 @@ function damageShip()
 			pancake.addTimer(2000, "single", idleShip)
 		end
 	end
+end
+
+function damageAlien()
+	if not alien.invulnerable and pirate.lives > 0 then
+		alien.lives = alien.lives - 1
+		alien.invulnerable = true
+		pancake.playSound("death")
+		pancake.addTimer(1500, "single", alienHittable)
+		pancake.shakeScreen()
+		if alien.lives <= 0 then
+			alien.animation = nil
+			alien.image = nil
+			pancake.paused = true
+		end
+	end
+end
+
+function alienHittable()
+	alien.invulnerable = false
 end
 
 function pancake.onOverlap(object1, object2, dt) -- This function will be called every time object "collides" with a non colliding object! Parameters: object1, object2 - objects of collision, dt - time of collision
@@ -720,11 +792,11 @@ function pancake.onOverlap(object1, object2, dt) -- This function will be called
 				pancake.shakeScreen()
 				pancake.playSound("crash")
 				if farmer.lives == 0 then
+					farmer.x = farmer.x + 12
 					pancake.changeAnimation(farmer, "sleep")
 					farmer.offsetY = farmer.offsetY + 5
 					farmer.sleep = true
 					farmer.velocityX = 0
-					pancake.cameraFollow = ship
 				end
 			end
 			pancake.trash(pancake.objects, object1.ID, "ID")
@@ -855,16 +927,23 @@ function pancake.onOverlap(object1, object2, dt) -- This function will be called
 				end
 			end
 		elseif object1.name == "bullet" and not alien.timeStopped and object2.name ~= "pirate" then
-			if object2.nanme == "alien" then
-				--damage
+			if object2.name == "alien" then
+				damageAlien()
 			end
 			if object2.name == "barrel" then
 				local explosion = pancake.addObject({name = "explosion", image = "explosion", x = object2.x - 4, y = object2.y - 4, width = 13, height = 13})
 				pancake.addTimer(100, "single", deleteObject, explosion)
 				pancake.trash(pancake.objects, object2.ID, "ID")
+				pancake.playSound("boom")
 			end
 			pancake.trash(pancake.objects, object1.ID, "ID")
 
+		elseif object1.name == "explosion" and object2.name == "pirate" then
+			if not pirate.waiting then
+				damagePirate()
+			end
+		elseif object1.name == "explosion" and object2.name == "alien" then
+			damageAlien()
 		end
 	end
 end
@@ -873,8 +952,10 @@ function pirateMeeleAttack()
 	if not pirate.dead and not alien.timeStopped then
 		if pirate.x > alien.x then
 			pirate.velocityX = -70
+			pirate.flippedX = true
 		else
 			pirate.velocityX = 70
+			pirate.flippedX = false
 		end
 	end
 	pancake.addTimer(1000, "single", pirateShoot)
@@ -886,9 +967,14 @@ function pirateShoot()
 		local bullet = pancake.applyPhysics(pancake.addObject({name = "bullet", image = "bullet", x = pirate.x - 1, y = pirate.y, width = 3, height = 3}))
 		pancake.addForce(bullet, {time = "infinite", x = 0,  y = -12*pancake.meter, relativeToMass = true})
 		local xDistance = pirate.x - alien.x
-		local yDistance = math.abs(pirate.y - alien.y)
+		local yDistance = math.abs(pirate.y + 3 - alien.y)
 		bullet.velocityX = -xDistance/math.sqrt(xDistance*xDistance + yDistance*yDistance)*70
 		bullet.velocityY = -yDistance/math.sqrt(xDistance*xDistance + yDistance*yDistance)*70
+		if xDistance > 0 then
+			pirate.flippedX = false
+		else
+			pirate.flippedX = true
+		end
 	end
 end
 
@@ -911,8 +997,14 @@ function love.draw()
 	if levelType == "ship" and text == nil then
 		if level == 4 then
 			if farmer.invulnerable then
-				for i = 1, farmer.lives do
+				for i = 1, 5 do
+					if farmer.lives >= i then
+						love.graphics.setColor(1, 1, 1, 1)
+					else
+						love.graphics.setColor(0.3, 0.3, 0.3, 1)
+					end
 					love.graphics.draw(pancake.images.little_heart, x + 40*scale+4*i*scale, y + 70*scale, 0, scale)
+					love.graphics.setColor(1, 1, 1, 1)
 				end
 			end
 		end
@@ -921,7 +1013,7 @@ function love.draw()
 				love.graphics.draw(pancake.images.heart, x + 96*scale - i*12*scale, y + 1*scale, 0, scale)
 			end
 		end
-		if not level == 4 then
+		if level == 1 then
 			pancake.print(pancake.round(2000 - ship.x) .. "m", pancake.window.x, pancake.window.y, scale)
 		end
 		love.graphics.rectangle("fill" , x + 90*scale, y + 84*scale, 3*scale, 10*scale)
@@ -935,6 +1027,28 @@ function love.draw()
 			pancake.print("to restart", x + 14*scale, y + 64*scale, 2*scale)
 		end
 	elseif levelType == "ground" and text == nil then
+		if level == 5 then
+			if alien.lives > 0 then
+				for i = 1, alien.lives do
+					love.graphics.draw(pancake.images.heart, x + 96*scale - i*12*scale, y + 1*scale, 0, scale)
+				end
+			else
+				pancake.print("Press", x + 30*scale, y + 24*scale, 2*scale)
+				pancake.print("J", x + 44*scale, y + 44*scale, 2*scale)
+				pancake.print("to restart", x + 14*scale, y + 64*scale, 2*scale)
+			end
+			if pirate.invulnerable then
+				for i = 1, 7 do
+					if pirate.lives >= i then
+						love.graphics.setColor(1, 1, 1, 1)
+					else
+						love.graphics.setColor(0.3, 0.3, 0.3, 1)
+					end
+					love.graphics.draw(pancake.images.little_heart, x + pirate.x*scale - 16*scale + i*4*scale, y - pancake.window.offsetY*scale - 16*scale, 0, scale)
+					love.graphics.setColor(1, 1, 1, 1)
+				end
+			end
+		end
 		if alien.pages and not pancake.debugMode then
 			love.graphics.setColor(0, 0, 0, 1)
 			love.graphics.rectangle("fill" , x, y, 40*scale, 10*scale)
@@ -950,6 +1064,7 @@ function love.draw()
 		love.graphics.setColor(1, 1, 1, 1)
 		pancake.print(love.timer.getFPS(),0,0,2*scale)
 		pancake.print("lv"..level,0,7*2*scale,2*scale)
+		pancake.print(pancake.window.offsetY,0,14*2*scale,scale)
 	end
 end
 
@@ -1234,6 +1349,8 @@ function love.update(dt)
 				for i = 1, #pancake.objects do
 					if pancake.objects[i].name == "astronaut" then
 						pancake.objects[i].image = "astronaut_idle1"
+					elseif pancake.objects[i].name == "pirate" then
+						pancake.objects[i].image = "pirate_idle1"
 					end
 				end
 			end
