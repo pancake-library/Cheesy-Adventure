@@ -33,6 +33,7 @@ function loadLevel(stage)
 		end
 	elseif level == 2 then
 		level = 2
+		pancake.physics.gravityY = 0.2*12*pancake.meter
 		loadGroundLevel()
 		alien.pages = 0
 		pancake.paused = false
@@ -95,6 +96,7 @@ function loadLevel(stage)
 		pancake.addObject({name = "fake_ground", image = "ground", x = 200, y = -40, width = 8*8, height = 5*8, textured = true, texture = {width = 8, height = 8}})
 	elseif level == 3 then
 		level = 3
+		pancake.physics.gravityY = 0.2*12*pancake.meter
 		loadGroundLevel()
 		alien.safePlace = {x = -15, y = -10}
 		alien.timeStopper = true
@@ -173,10 +175,47 @@ function loadLevel(stage)
 		cow = pancake.addObject({name = "cow", image = "cow", x = 0, y = 0, width = 16, height = 10})
 		pancake.changeAnimation(cow, "run")
 	elseif level == 5 then
+		level = 5
+		pancake.physics.gravityY = 12*pancake.meter
 		loadGroundLevel()
+		alien.timeStopper = true
 		alien.x = 40
 		alien.y = -30
-		rectangle(0,0, 10, 10, "steel")
+		alien.x = 9
+		alien.y = -184
+		rectangle(-8,0, 12, 6, "steel")
+		rectangle(-8,-800, 1, 100, "steel")
+		rectangle(80,-800, 1, 100, "steel")
+		pancake.addTimer(1000, "single", dropBarrel)
+		boxes = {}
+		for i = 1, 5 do
+			if i%2 == 1 then
+				boxes[i] = rectangle(0,-i*35, 1, 1, "steel")
+			else
+				boxes[i] = rectangle(72,-i*35, 1, 1, "steel")
+			end
+		end
+		platform = pancake.addObject({y = -200, x = 78, image = "platform", flippedX = true, name = "platform", colliding = true, width = 10, height = 3})
+		pirate = pancake.addObject({y = -211, x = 76, flippedX = true, name = "pirate", width = 8, height = 11, offsetX =-2})
+		pancake.changeAnimation(pirate, "idle")
+		pirate.waiting = true
+	end
+end
+
+function dropBarrel()
+	local tryBarrel = {colliding = true, name = "barrel", image = "barrel",x = math.random(16,60), y = -280, width = 6, height = 7}
+	if not pancake.isObjectColliding(tryBarrel) and not alien.timeStopped then
+		local barrel = pancake.applyPhysics(pancake.addObject(tryBarrel))
+		pancake.addForce(barrel, {time = "infinite",  y = -pancake.physics.gravityY, relativeToMass = true})
+		barrel.velocityY = 40
+		if alien.timeStopped then
+			barrel.physics = false
+		end
+	end
+	if pirate.waiting then
+		pancake.addTimer(500, "single", dropBarrel)
+	else
+		pancake.addTimer(1200, "single", dropBarrel)
 	end
 end
 
@@ -273,6 +312,7 @@ function loadAssets()
 	pancake.addAnimation("bird","fly","images/animations",200)
 	pancake.addAnimation("cow","run","images/animations",120)
 	pancake.addAnimation("farmer","sleep","images/animations",100)
+	pancake.addAnimation("pirate","idle","images/animations",100)
 	--Adding buttons
 	pancake.addImage("right", "images/ui")
 	pancake.addImage("right_clicked", "images/ui")
@@ -322,6 +362,10 @@ function loadAssets()
 	pancake.addImage("apple", "images")
 	pancake.addImage("little_heart", "images")
 	pancake.addImage("bullet", "images")
+	pancake.addImage("barrel", "images")
+	pancake.addImage("pill", "images")
+	pancake.addImage("platform", "images")
+	pancake.addImage("explosion", "images")
 	--sounds
 	pancake.addSound("laser")
 	pancake.addSound("success")
@@ -354,7 +398,6 @@ function loadGroundLevel()
 	pancake.objects = {}
 	pancake.timers = {}
 	levelType = "ground"
-	pancake.physics.gravityY = 0.2*12*pancake.meter
 	alien = pancake.applyPhysics(pancake.addObject({name = "alien", x = 15, y = 70, width = 5, height = 9, offsetX = -5, offsetY = -5, colliding = true}))
 	--alien.x = 233
 	--alien.y = -10
@@ -408,7 +451,7 @@ function centerPressed()
 				pancake.paused = false
 			end
 		end
-	elseif level == 3 and alien and not alien.timeStopped and text == nil and alien.timeStopper then
+	elseif (level == 3 or level == 5) and alien and not alien.timeStopped and text == nil and alien.timeStopper then
 		alien.timeStopped = true
 		local timeWave = pancake.addObject({name = "timewave",x = alien.x-6, y = alien.y-7,width = 10, height = 10})
 		pancake.changeAnimation(timeWave, "idle")
@@ -504,6 +547,12 @@ function startTime()
 		elseif object.name == "red_laser" then
 			object.physics = true
 			object.velocityY = 40*pancake.boolConversion(object.goingDown, 1, -1)
+		elseif object.name == "barrel" then
+			object.physics = true
+		elseif object.name == "pirate" and pirate and not pirate.waiting then
+			object.physics = true
+		elseif object.name == "bullet" then
+			object.physics = true
 		end
 	end
 end
@@ -527,7 +576,7 @@ function shoot()
 	if not ship.dead and not ship.laserTimer then
 		local laser = pancake.applyPhysics(pancake.addObject({name = "laser", x = ship.x + pancake.boolConversion(ship.flippedX, 0, 10), y = ship.y+2, height = 3, width = 8, image = "laser"}))
 		pancake.applyForce(laser, {x = pancake.boolConversion(ship.flippedX, -1, 1)*200, relativeToMass = true}, 1)
-		pancake.addTimer(600,"single",deleteLaser, laser)
+		pancake.addTimer(600,"single",deleteObject, laser)
 		pancake.playSound("laser")
 		ship.laserTimer = pancake.addTimer(2000,"single", resetLaserTimer)
 	end
@@ -537,8 +586,8 @@ function resetLaserTimer()
 	ship.laserTimer = nil
 end
 
-function deleteLaser(laser)
-	pancake.trash(pancake.objects, laser.ID, "ID")
+function deleteObject(object)
+	pancake.trash(pancake.objects, object.ID, "ID")
 end
 
 function pancake.onCollision(object1, object2, axis, direction, sc) --This function will be called whenever a physic object collides with a colliding object!
@@ -593,6 +642,18 @@ function pancake.onCollision(object1, object2, axis, direction, sc) --This funct
 	elseif object1.name == "alien" and object2.name == "ground" and axis == "x" then
 		alien.velocityX = 0
 		return false
+	elseif object1.name == "barrel" and not alien.timeStopped then
+		local explosion = pancake.addObject({name = "explosion", image = "explosion", x = object1.x - 4, y = object1.y - 4, width = 13, height = 13})
+		pancake.addTimer(100, "single", deleteObject, explosion)
+		pancake.trash(pancake.objects, object1.ID, "ID")
+	elseif object2.name == "barrel" and not alien.timeStopped then
+		local explosion = pancake.addObject({name = "explosion", image = "explosion", x = object2.x - 4, y = object2.y - 4, width = 13, height = 13})
+		pancake.addTimer(100, "single", deleteObject, explosion)
+		pancake.trash(pancake.objects, object2.ID, "ID")
+	elseif object2.name == "pirate" and not alien.timeStopped and axis == "x" then
+		object2.velocityX = 0
+	elseif object1.name == "pirate" and not alien.timeStopped and axis == "x" then
+		object1.velocityY = 0
 	end
 end
 
@@ -774,7 +835,60 @@ function pancake.onOverlap(object1, object2, dt) -- This function will be called
 			object1.goingDown = false
 		elseif object1.name == "alien" and object2.name == "red_laser" and not alien.timeStopped then
 			killAlien()
+		elseif object1.name == "alien" and object2.name == "pirate" and not alien.timeStopped then
+			alien.velocityX = -13
+			alien.x = pirate.x - 7
+			alien.y = pirate.y
+			pancake.applyPhysics(pirate)
+			pirate.velocityX = -7
+			pirate.velocityY = -70
+			pirate.colliding = true
+			pirate.waiting = false
+			for i = 1, #boxes do
+				pancake.trash(pancake.objects, boxes[i].ID, "ID")
+			end
+			pancake.addTimer(3000, "single", pirateMeeleAttack)
+			for i = 1, #pancake.objects do
+				local object = pancake.objects[i]
+				if object.name == "barrel" then
+					pancake.trash(pancake.objects, object.ID, "ID")
+				end
+			end
+		elseif object1.name == "bullet" and not alien.timeStopped and object2.name ~= "pirate" then
+			if object2.nanme == "alien" then
+				--damage
+			end
+			if object2.name == "barrel" then
+				local explosion = pancake.addObject({name = "explosion", image = "explosion", x = object2.x - 4, y = object2.y - 4, width = 13, height = 13})
+				pancake.addTimer(100, "single", deleteObject, explosion)
+				pancake.trash(pancake.objects, object2.ID, "ID")
+			end
+			pancake.trash(pancake.objects, object1.ID, "ID")
+
 		end
+	end
+end
+
+function pirateMeeleAttack()
+	if not pirate.dead and not alien.timeStopped then
+		if pirate.x > alien.x then
+			pirate.velocityX = -70
+		else
+			pirate.velocityX = 70
+		end
+	end
+	pancake.addTimer(1000, "single", pirateShoot)
+end
+
+function pirateShoot()
+	pancake.addTimer(500, "single", pirateMeeleAttack)
+	if not pirate.dead and not alien.timeStopped then
+		local bullet = pancake.applyPhysics(pancake.addObject({name = "bullet", image = "bullet", x = pirate.x - 1, y = pirate.y, width = 3, height = 3}))
+		pancake.addForce(bullet, {time = "infinite", x = 0,  y = -12*pancake.meter, relativeToMass = true})
+		local xDistance = pirate.x - alien.x
+		local yDistance = math.abs(pirate.y - alien.y)
+		bullet.velocityX = -xDistance/math.sqrt(xDistance*xDistance + yDistance*yDistance)*70
+		bullet.velocityY = -yDistance/math.sqrt(xDistance*xDistance + yDistance*yDistance)*70
 	end
 end
 
@@ -834,7 +948,8 @@ function love.draw()
 	--pancake.print("MmNnOoPpRrSsTtUuVvWwXxYyZz123467890!.",0, 7*scale,scale)
 	if pancake.debugMode then
 		love.graphics.setColor(1, 1, 1, 1)
-		pancake.print(love.timer.getFPS().. "FPS",0,0,2*scale)
+		pancake.print(love.timer.getFPS(),0,0,2*scale)
+		pancake.print("lv"..level,0,7*2*scale,2*scale)
 	end
 end
 
@@ -986,15 +1101,15 @@ function drawText()
 			pancake.print("Chapter 4", x+16*scale, y + 26*scale, scale*2)
 			pancake.print("On the Milky Way", x+18*scale, y + 50*scale, scale)
 		elseif text == 15 then
-			pancake.print("With the cow on his ship", x+8*scale, y + 37*scale, scale)
-			pancake.print("our hero decided to return", x+2*scale, y + 44*scale, scale)
-			pancake.print("to his home galaxy in order", x+2*scale, y + 51*scale, scale)
-			pancake.print("to start a pizza business.", x+6*scale, y + 58*scale, scale)
-			pancake.print("Hower, he got attacked by", x+6*scale, y + 65*scale, scale)
-			pancake.print("a space pirate: Jack Pigeon!", x+6*scale, y + 65*scale, scale)
+			pancake.print("With the cow on his ship", x+8*scale, y + 22*scale, scale)
+			pancake.print("our hero decided to return", x+2*scale, y + 29*scale, scale)
+			pancake.print("to his home galaxy in order", x+2*scale, y + 36*scale, scale)
+			pancake.print("to start a pizza business.", x+6*scale, y + 43*scale, scale)
+			pancake.print("Hower, he got attacked", x+6*scale, y + 50*scale, scale)
+			pancake.print("by a space pirate!", x+16*scale, y + 57*scale, scale)
 		elseif text == 16 then
 			pancake.print("Chapter 5", x+16*scale, y + 26*scale, scale*2)
-			pancake.print("Homecoming", x+26*scale, y + 50*scale, scale)
+			pancake.print("Just let me go", x+23*scale, y + 50*scale, scale)
 		end
 	end
 end
@@ -1068,19 +1183,31 @@ function love.update(dt)
 
 	--GROUND
 	elseif levelType == "ground" then
-		if level == 4 then
+		if level == 5 then
 			pancake.window.offsetX = 0
 		end
 		if pancake.isButtonClicked(left) then
-			pancake.applyForce(alien, {x = -70, relativeToMass = true})
+			if level == 5 then
+				pancake.applyForce(alien, {x = -200, relativeToMass = true})
+			else
+				pancake.applyForce(alien, {x = -70, relativeToMass = true})
+			end
 			alien.flippedX = true
 		end
 		if pancake.isButtonClicked(right) then
-			pancake.applyForce(alien, {x = 70, relativeToMass = true})
+			if level == 5 then
+				pancake.applyForce(alien, {x = 200, relativeToMass = true})
+			else
+				pancake.applyForce(alien, {x = 70, relativeToMass = true})
+			end
 			alien.flippedX = false
 		end
 		if pancake.isButtonClicked(up) and pancake.facing(alien).down then
-			pancake.applyForce(alien, {y = -32, relativeToMass = true},1)
+			if level == 5 then
+				pancake.applyForce(alien, {y = -74, relativeToMass = true},1)
+			else
+				pancake.applyForce(alien, {y = -32, relativeToMass = true},1)
+			end
 		end
 		if not pancake.facing(alien).down then
 			alien.image = pancake.animations.alien.run[1]
@@ -1102,7 +1229,7 @@ function love.update(dt)
 			alien.x = 0
 			alien.velocityX = 0
 		end
-		if level == 3 then
+		if (level == 3 or level == 5)then
 			if alien.timeStopped then
 				for i = 1, #pancake.objects do
 					if pancake.objects[i].name == "astronaut" then
