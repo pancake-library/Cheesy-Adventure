@@ -250,16 +250,20 @@ function loadLevel(stage)
 		ship.lives = 5
 		rectangle(-40, 90, 305, 2, "grass")
 		farmer = pancake.applyPhysics(pancake.addObject({name = "farmer", x = 20, y = 78, width = 8, height = 12, offsetX = -4, offsetY = -2}))
-		pancake.changeAnimation(farmer, "run")
-		ship.velocityX = 35
-		farmer.velocityX = 35
-		farmer.lives = 5
+		farmer.image = pancake.animations.farmer.run[2]
+		ship.velocityX = 0
+		farmer.lives = 6
 		pancake.cameraFollow = farmer
-		pancake.addTimer(7000, "single", farmerAttack)
-		pancake.addTimer(300, "single", sendABird)
 		generateTrees()
 		cow = pancake.addObject({name = "cow", image = "cow", x = 0, y = 0, width = 16, height = 10})
 		pancake.changeAnimation(cow, "run")
+		theBird = pancake.applyPhysics(pancake.addObject({name = "bird", y = 20, x = 100, width = 7, height = 5}))
+		theApple = pancake.applyPhysics(pancake.addObject({image = "apple", name = "apple", y = 22, x = 103, width = 2, height = 2}))
+		pancake.changeAnimation(theBird, "fly")
+		theBird.velocityX = -30
+		theApple.velocityX = -30
+		pancake.addTimer(2700, "single", dropApple)
+		pancake.addTimer(5000, "single", startFarmer)
 	elseif level == 5 then
 		level = 5
 		pancake.physics.gravityY = 12*pancake.meter
@@ -288,6 +292,18 @@ function loadLevel(stage)
 		pirate.invulnerable = false
 		alien.lives = 5
 	end
+end
+
+function dropApple()
+	theApple.velocityX = 0
+	theApple.velocityY = 50
+end
+
+function startFarmer()
+	pancake.addTimer(7000, "single", farmerAttack)
+	pancake.addTimer(300, "single", sendABird)
+	farmer.velocityX = 35
+	pancake.changeAnimation(farmer, "run")
 end
 
 function damagePirate()
@@ -485,6 +501,7 @@ function loadAssets()
 	pancake.addImage("button", "images")
 	pancake.addImage("title", "images")
 	pancake.addImage("time_stopper", "images")
+	pancake.addImage("pizza_alien", "images")
 	--sounds
 	pancake.addSound("laser")
 	pancake.addSound("success")
@@ -771,6 +788,10 @@ function centerPressed()
 				pancake.save(bestTime, "bestTime")
 			end
 		end
+	elseif text == 18 then
+		text = 17
+		pancake.paused = true
+		level = 0
 	end
 end
 
@@ -1032,9 +1053,14 @@ function pancake.onOverlap(object1, object2, dt) -- This function will be called
 			damageShip()
 		elseif object1.name == "ship" and object2.name == "tree" then
 			damageShip()
-		elseif object1.name == "laser" and object2.name == "apple" then
-			pancake.applyPhysics(object2)
-			object2.velocityY = 100
+		elseif object1.name == "tree" and object2.name == "apple" then
+			if object1.fallApple then
+				pancake.applyPhysics(object2)
+				object2.velocityY = 100
+			end
+		elseif object1.name == "laser" and object2.name == "tree" then
+			object2.fallApple = true
+			pancake.trash(pancake.objects, object1.ID, "ID")
 		elseif object1.name == "apple" and object2.name == "farmer" then
 			if not farmer.invulnerable then
 				farmer.lives = farmer.lives - 1
@@ -1189,10 +1215,12 @@ function pancake.onOverlap(object1, object2, dt) -- This function will be called
 					end
 				end
 			else
-				text = 17
+				text = 18
 				pancake.paused = true
 				chaptersCleared = 5
 				pancake.save(chaptersCleared, "chaptersCleared")
+				pancake.objects = {}
+				pancake.timers = {}
 			end
 		elseif object1.name == "bullet" and not alien.timeStopped and object2.name ~= "pirate" then
 			if object2.name == "alien" then
@@ -1270,7 +1298,7 @@ function love.draw()
 	if levelType == "ship" and text == nil then
 		love.graphics.setColor(0.2, 0.8, 0.2, 1)
 		if ship.laserTimeLeft > 0 then
-			love.graphics.rectangle("fill", x +20*scale, y+2*scale, ship.laserTimeLeft*scale, 3*scale)
+			love.graphics.rectangle("fill", x +24*scale, y+2*scale, ship.laserTimeLeft*scale, 3*scale)
 		end
 		love.graphics.setColor(1, 1, 1, 1)
 		if level == 4 then
@@ -1640,7 +1668,9 @@ function drawText()
 			pancake.print("After returning to his", x+8*scale, y + 27*scale, scale)
 			pancake.print("ship, he grabbed his trusty", x+2*scale, y + 34*scale, scale)
 			pancake.print("pocket time stopper.", x+10*scale, y + 41*scale, scale)
+			love.graphics.setColor(0, 1, 0, 1)
 			pancake.print("Press J to stop time!", x+12*scale, y + 60*scale, scale)
+			love.graphics.setColor(1, 1, 1, 1)
 		elseif text == 12 then
 			love.graphics.draw(pancake.images.page, x, y, 0, scale)
 			love.graphics.setColor(0.4, 0.3, 0.2, 1)
@@ -1676,20 +1706,27 @@ function drawText()
 			love.graphics.setColor(0.8, 0.8, 0.2, 1)
 			pancake.print("Congratulations!", x+16*scale, y + 10*scale, scale)
 			love.graphics.setColor(1, 1, 1, 1)
-			pancake.print("You won the game in:", x+14*scale, y + 30*scale, scale)
+			pancake.print("You won the game in:", x+12*scale, y + 30*scale, scale)
 			local shownMs
 			if string.sub(timer.ms, 3, 3) == "." then
 				shownMs = string.sub(timer.ms, 1, 2)
 			else
 				shownMs = string.sub(timer.ms, 1, 3)
 			end
-			pancake.print(timer.m - pancake.boolConversion(easterEgg, 5, 0) .. " minutes " .. timer.s .. "." .. shownMs .." seconds!", x+8*scale, y + 37*scale, scale)
+			pancake.print(timer.m - pancake.boolConversion(easterEgg, 5, 0) .. " minutes " .. timer.s .. "." .. shownMs .." seconds!", x+2*scale, y + 37*scale, scale)
 			pancake.print("Starting from chapter " .. startingFromLevel .. "!", x+6*scale, y + 44*scale, scale)
 			if easterEgg then
 				pancake.print("The power of easter egg ", x+6*scale, y + 64*scale, scale)
 				pancake.print("decreases time by", x+18*scale, y + 71*scale, scale)
 				pancake.print("5 minutes!", x+28*scale, y + 78*scale, scale)
 			end
+		elseif text == 18 then
+			pancake.print("And so our hero returned", x+6*scale, y + 10*scale, scale)
+			pancake.print("to his galaxy and became ", x+5*scale, y + 17*scale, scale)
+			pancake.print("the best pizza seller in ", x+8*scale, y + 24*scale, scale)
+			pancake.print("the entire universe!", x+13	*scale, y + 31*scale, scale)
+			love.graphics.draw(pancake.images.pizza_alien, x + 40*scale, y +40*scale, 0, scale)
+			pancake.print("THE END", x+20*scale, y + 70*scale, 2*scale)
 		end
 	end
 end
