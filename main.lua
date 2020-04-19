@@ -44,6 +44,9 @@ function love.load()
 	up = pancake.addButton({func = upPressed, key = "w", name="up",x = love.graphics.getWidth()-15*pancake.window.pixelSize, y = love.graphics.getHeight()-16*pancake.window.pixelSize, width = 14, height = 14, scale = pancake.window.pixelSize})
 	down = pancake.addButton({func = downPressed, key = "s", name="down",x = love.graphics.getWidth()-31*pancake.window.pixelSize, y = love.graphics.getHeight()-16*pancake.window.pixelSize, width = 14, height = 14, scale = pancake.window.pixelSize})
 	center = pancake.addButton({func = centerPressed, key = "j", name="center",x = love.graphics.getWidth()-15*pancake.window.pixelSize, y = love.graphics.getHeight()-31*pancake.window.pixelSize, width = 14, height = 14, scale = pancake.window.pixelSize})
+	inv = {}
+	logs = false
+	gunObtain = false
 end
 
 function compareTimes(time1, time2)
@@ -385,7 +388,10 @@ function sendABird()
 		local bird = pancake.applyPhysics(pancake.addObject({name = "bird", y = math.random(0, 60), x = farmer.x + math.random(100, 150), width = 7, height = 5}))
 		pancake.changeAnimation(bird, "fly")
 		bird.velocityX = -math.random(15, 25)
-		pancake.addTimer(1200, "single", sendABird)
+		pancake.addTimer(1200, "single", sendABird
+	elseif level == 5 then
+		level = 5
+		loadTestLevel()
 	end
 end
 
@@ -557,7 +563,10 @@ end
 
 function loadTestLevel()
 	pancake.debugMode = true
-	guy = pancake.applyPhysics(pancake.addObject({name = "guy", x = 15, y = 70, width = 5, height = 9, offsetX = -5, offsetY = -5, colliding = true}))
+	alien = pancake.applyPhysics(pancake.addObject({name = "alien", x = 15, y = 70, width = 5, height = 9, offsetX = -5, offsetY = -5, colliding = true}))
+	for i = 0, 3 do
+		pancake.addObject({x = x + i*8, y = y, image = "ground", colliding = true, width = 8, height = 8})
+	end
 end
 
 function decreaseFuel()
