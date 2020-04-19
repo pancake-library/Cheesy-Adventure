@@ -401,7 +401,8 @@ function sendABird()
 		local bird = pancake.applyPhysics(pancake.addObject({name = "bird", y = math.random(0, 60), x = farmer.x + math.random(100, 150), width = 7, height = 5}))
 		pancake.changeAnimation(bird, "fly")
 		bird.velocityX = -math.random(15, 25)
-		pancake.addTimer(1200, "single", sendABird
+		pancake.addTimer(1200, "single", sendABird)
+	end
 end
 
 function rectangle(x, y, width, height, texture)
@@ -569,6 +570,11 @@ function generateFuel()
 	for i =1, 6 do
 		pancake.addObject({name = "fuel", image = "fuel", x=i*350, y = math.random(0,80), width = 7, height = 9})
 	end
+end
+
+function loadTestLevel()
+	pancake.debugMode = true
+	guy = pancake.applyPhysics(pancake.addObject({name = "guy", x = 15, y = 70, width = 5, height = 9, offsetX = -5, offsetY = -5, colliding = true}))
 end
 
 function decreaseFuel()
