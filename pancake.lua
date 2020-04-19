@@ -1156,19 +1156,29 @@ function pancake.addSound (name, subfolder)
 end
 
 function pancake.playSound(name, overlap)
-local overlap = overlap or false
-local sounds = pancake.sounds
-	if type(name) == "string" then
-		local sound = pancake.find(sounds, name, "name")
-		if sound.sound:isPlaying( ) and not overlap then
-			sound.sound:stop()
+if not pancake.soundMuted then
+	local overlap = overlap or false
+	local sounds = pancake.sounds
+		if type(name) == "string" then
+			local sound = pancake.find(sounds, name, "name")
+			if sound.sound:isPlaying( ) and not overlap then
+				sound.sound:stop()
+			end
+				sound.sound:play()
+		else
+			if sounds[name].sound:isPlaying( ) and not overlap then
+				sounds[name].sound:stop()
+			end
+			sounds[name].sound:play()
 		end
-			sound.sound:play()
+	end
+end
+
+function pancake.muteSounds(option)
+	if option then
+		pancake.soundMuted = true
 	else
-		if sounds[name].sound:isPlaying( ) and not overlap then
-			sounds[name].sound:stop()
-		end
-		sounds[name].sound:play()
+		pancake.soundMuted = false
 	end
 end
 

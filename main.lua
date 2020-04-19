@@ -1,24 +1,109 @@
 pancake =  require "pancake"
 function love.load()
+	if love.filesystem.getInfo("easterEgg") and pancake.load("easterEgg") == "YES!" then
+		easterEgg = true
+	end
+	if not easterEgg then
+		easterEgg = false
+		pancake.save("nope :C", "easterEgg")
+	end
+	if love.filesystem.getInfo("chaptersCleared") then
+		continueOption = true
+		chaptersCleared = tonumber(pancake.load("chaptersCleared"))
+	end
+	if not chaptersCleared then
+		chaptersCleared = 0
+		pancake.save(chaptersCleared, "chaptersCleared")
+	end
+	if love.filesystem.getInfo("bestTime") then
+		bestTime = pancake.load("bestTime", "table")
+	end
 	math.randomseed(os.time())
 	love.graphics.setBackgroundColor(0.1,0.1,0.1,1) --So it won't merge with pancake's background!!!
 	pancake.init({window = {pixelSize = love.graphics.getHeight()/96, width = 96, height = 96}}) --Initiating pancake and setting pixelSize, so that the pancake display will be the height of the window! pixelSize is how many pixels every pancake pixel should take
 	--pancake.loadAnimation = nil
-	--pancake.paused = true
+	pancake.paused = true
 	pancake.smoothRender = true
 	--pancake.debugMode = true
+	timer = {}
+	timer.ms = 0
+	timer.s = 0
+	timer.m = 0
+	sfx = true
+	music = true
+	displayTimer = false
+	options = false
 	loadAssets()
 	text = nil
-	level = 1
+	level = 0
+	splash = true
+	splash = false
 	pancake.background.image = pancake.images.background
 	left = pancake.addButton({key = "a", name="left",x = 1*pancake.window.pixelSize, y = love.graphics.getHeight()-16*pancake.window.pixelSize, width = 14, height = 14, scale = pancake.window.pixelSize})
 	right = pancake.addButton({key = "d", name="right",x = 17*pancake.window.pixelSize, y = love.graphics.getHeight()-16*pancake.window.pixelSize, width = 14, height = 14, scale = pancake.window.pixelSize})
-	up = pancake.addButton({key = "w", name="up",x = love.graphics.getWidth()-15*pancake.window.pixelSize, y = love.graphics.getHeight()-16*pancake.window.pixelSize, width = 14, height = 14, scale = pancake.window.pixelSize})
-	down = pancake.addButton({key = "s", name="down",x = love.graphics.getWidth()-31*pancake.window.pixelSize, y = love.graphics.getHeight()-16*pancake.window.pixelSize, width = 14, height = 14, scale = pancake.window.pixelSize})
+	up = pancake.addButton({func = upPressed, key = "w", name="up",x = love.graphics.getWidth()-15*pancake.window.pixelSize, y = love.graphics.getHeight()-16*pancake.window.pixelSize, width = 14, height = 14, scale = pancake.window.pixelSize})
+	down = pancake.addButton({func = downPressed, key = "s", name="down",x = love.graphics.getWidth()-31*pancake.window.pixelSize, y = love.graphics.getHeight()-16*pancake.window.pixelSize, width = 14, height = 14, scale = pancake.window.pixelSize})
 	center = pancake.addButton({func = centerPressed, key = "j", name="center",x = love.graphics.getWidth()-15*pancake.window.pixelSize, y = love.graphics.getHeight()-31*pancake.window.pixelSize, width = 14, height = 14, scale = pancake.window.pixelSize})
 end
 
+function compareTimes(time1, time2)
+	local value1 = (time1.m*60+time1.s)*1000 + time1.ms
+	local value2 = (time2.m*60+time2.s)*1000 + time2.ms
+	local ret
+	if value1 <= value2 then
+		ret = time1
+	else
+		ret = time2
+	end
+end
+
+function downPressed()
+	if splash and menu then
+		pancake.playSound("button")
+		option = option + 1
+		if option == 6 then
+			option = 1
+		end
+	elseif chooseChapter then
+		pancake.playSound("button")
+		option = option + 1
+		if option == 7 then
+			option = 1
+		end
+	elseif options then
+		pancake.playSound("button")
+		option = option + 1
+		if option == 5 then
+			option = 1
+		end
+	end
+end
+
+function upPressed()
+	if splash and menu then
+		pancake.playSound("button")
+		option = option - 1
+		if option == 0 then
+			option = 5
+		end
+	elseif chooseChapter then
+		pancake.playSound("button")
+		option = option - 1
+		if option == 0 then
+			option = 6
+		end
+	elseif options then
+		pancake.playSound("button")
+		option = option - 1
+		if option == 0 then
+			option = 4
+		end
+	end
+end
+
 function loadLevel(stage)
+	splash = false
+	menu = false
 	level = stage
 	if level == 1 then
 		level = 1
@@ -87,7 +172,7 @@ function loadLevel(stage)
 		spike(58,-7,7)
 		local page2 = pancake.addObject({name = "page", x = 45, y = -9, width = 8, height = 8})
 		pancake.changeAnimation(page2, "idle")
-		pancake.addObject({name = "esater_egg", image = "easter_egg", x = 233, y = -30, width = 8, height = 8})
+		pancake.addObject({name = "easter_egg", image = "easter_egg", x = 233, y = -30, width = 8, height = 8})
 		rectangle(63*8,-8*8,20,60)
 		rectangle(66*8,-16*8,10,8)
 		local page3 = pancake.addObject({name = "page", x = 65*8, y = -9*8-3, width = 8, height = 8})
@@ -181,8 +266,8 @@ function loadLevel(stage)
 		alien.timeStopper = true
 		alien.x = 40
 		alien.y = -30
-		--alien.x = 76
-		--alien.y = -200
+		alien.x = 76
+		alien.y = -200
 		rectangle(-8,0, 12, 6, "steel")
 		rectangle(-8,-800, 1, 100, "steel")
 		rectangle(80,-800, 1, 100, "steel")
@@ -199,7 +284,7 @@ function loadLevel(stage)
 		pirate = pancake.addObject({y = -211, x = 76, flippedX = true, name = "pirate", width = 8, height = 11, offsetX =-2})
 		pancake.changeAnimation(pirate, "idle")
 		pirate.waiting = true
-		pirate.lives = 7
+		pirate.lives = 1
 		pirate.invulnerable = false
 		alien.lives = 5
 	end
@@ -210,13 +295,13 @@ function damagePirate()
 		pancake.shakeScreen()
 		pirate.lives = pirate.lives - 1
 		pirate.invulnerable = true
-		pancake.addTimer(2000, "single", pirateHittable)
+		pancake.addTimer(1000, "single", pirateHittable)
 		if pirate.lives == 0 then
 			pirate.dead = true
 			pirate.offsetY = 4
 			pancake.changeAnimation(pirate, "dead")
 			pirate.physics = false
-			pireta.colliding = false
+			pirate.colliding = false
 			for i = 1, #pancake.objects do
 				local object = pancake.objects[i]
 				if object.name == "barrel" then
@@ -396,6 +481,9 @@ function loadAssets()
 	pancake.addImage("pill", "images")
 	pancake.addImage("platform", "images")
 	pancake.addImage("explosion", "images")
+	pancake.addImage("splash", "images")
+	pancake.addImage("button", "images")
+	pancake.addImage("title", "images")
 	--sounds
 	pancake.addSound("laser")
 	pancake.addSound("success")
@@ -406,21 +494,27 @@ function loadAssets()
 	pancake.addSound("timestop")
 	pancake.addSound("timestart")
 	pancake.addSound("timecooldown")
+	pancake.addSound("button")
+	pancake.addSound("accept")
 	--music
 	chapter1 = love.audio.newSource("music/chapter1.ogg", "stream")
 	chapter1:setLooping(true)
-	chapter1:setVolume(0.9)
 	chapter2 = love.audio.newSource("music/chapter2.ogg", "stream")
 	chapter2:setLooping(true)
-	chapter2:setVolume(1.6)
 	chapter3 = love.audio.newSource("music/chapter3.ogg", "stream")
 	chapter3:setLooping(true)
-	chapter3:setVolume(1.3)
 	chapter4 = love.audio.newSource("music/chapter4.ogg", "stream")
 	chapter4:setLooping(true)
-	chapter4:setVolume(1.3)
 	chapter5 = love.audio.newSource("music/chapter5.ogg", "stream")
 	chapter5:setLooping(true)
+	loadMusic()
+end
+
+function loadMusic()
+	chapter1:setVolume(0.9)
+	chapter2:setVolume(1.6)
+	chapter3:setVolume(1.3)
+	chapter4:setVolume(1.3)
 	chapter5:setVolume(1.3)
 end
 
@@ -481,7 +575,7 @@ function centerPressed()
 				pancake.paused = false
 			end
 		end
-	elseif (level == 3 or level == 5) and alien and not alien.timeStopped and text == nil and alien.timeStopper and alien.lives ~= 0 then
+	elseif (level == 3 or level == 5) and alien and not alien.timeStopped and text == nil and alien.timeStopper and alien.lives ~= 0 and not options then
 		alien.timeStopped = true
 		local timeWave = pancake.addObject({name = "timewave",x = alien.x-6, y = alien.y-7,width = 10, height = 10})
 		pancake.changeAnimation(timeWave, "idle")
@@ -497,7 +591,7 @@ function centerPressed()
 			end
 		end
 	end
-	if level == 5 and alien.lives == 0 then
+	if level == 5 and alien and alien.lives == 0 then
 		if pirate.waiting then
 			loadLevel(5)
 			pancake.paused = false
@@ -566,7 +660,117 @@ function centerPressed()
 		level = 5
 		loadLevel(5)
 		pancake.paused = false
+
 	end
+	if splash and not menu and not chooseChapter and not options then
+		pancake.playSound("accept")
+		menu = true
+		option = 1
+	elseif splash and menu then
+		pancake.playSound("accept")
+		if option == 1 and continueOption then
+			loadTextForLevel(pancake.boolConversion(chaptersCleared+1 <= 5, chaptersCleared+1, 5))
+		elseif option == 2 then
+			menu = false
+			splash = false
+			loadTextForLevel(1)
+		elseif option == 3 then
+			menu = false
+			chooseChapter = true
+			option = 6
+		elseif option == 4 then
+			menu = false
+			options = true
+			option = 1
+		elseif option == 5 then
+			menu = false
+			credits = true
+			splash = false
+			option = 5
+		end
+	elseif chooseChapter then
+		pancake.playSound("accept")
+		if option == 6 then
+			menu = true
+			option = 1
+			chooseChapter = false
+		elseif option <= chaptersCleared + 1 then
+			loadTextForLevel(option)
+		end
+	elseif credits then
+		pancake.playSound("accept")
+		menu = true
+		credits = false
+		splash = true
+	elseif options then
+		pancake.playSound("accept")
+		if option == 1 and splash then
+			menu = true
+			options = false
+			option = 4
+		elseif option == 1 then
+			options = false
+			pancake.paused = false
+		elseif option == 2 then
+			displayTimer = not displayTimer
+		elseif option == 3 then
+			music = not music
+			if music then
+				loadMusic()
+			else
+				chapter1:setVolume(0)
+				chapter2:setVolume(0)
+				chapter3:setVolume(0)
+				chapter4:setVolume(0)
+				chapter5:setVolume(0)
+			end
+		elseif option == 4 then
+			pancake.muteSounds(sfx)
+			sfx = not sfx
+		end
+	elseif text == 17 then
+		pancake.playSound("accept")
+		text = nil
+		pancake.objects = {}
+		pancake.timers = {}
+		menu = true
+		splash = true
+		option = 1
+		pancake.paused = true
+		chapter5:pause()
+		if startingFromLevel == 1 then
+			if bestTime then
+				pancake.save(compareTimes(timer, bestTime), "bestTime")
+			else
+				bestTime = timer
+				pancake.save(bestTime, "bestTime")
+			end
+		end
+	end
+end
+
+function loadTextForLevel(stage)
+	if stage == 1 then
+		text = 0
+		level = 1
+	elseif stage == 2 then
+		text = 4
+		level = 2
+	elseif stage == 3 then
+		text = 10
+		level = 3
+	elseif stage == 4 then
+		text = 13
+		level = 4
+	elseif stage == 5 then
+		text = 15
+		level = 5
+	end
+	menu = false
+	splash = false
+	chooseChapter = false
+	startingFromLevel = stage
+	startingFromLevel = 1
 end
 
 function timerCooldown()
@@ -590,12 +794,14 @@ function startTime()
 			object.velocityY = 40*pancake.boolConversion(object.goingDown, 1, -1)
 		elseif object.name == "barrel" then
 			object.physics = true
-		elseif object.name == "pirate" and pirate and not pirate.waiting then
+		elseif object.name == "pirate" and pirate and not pirate.waiting and not pirate.dead then
 			object.physics = true
 		elseif object.name == "bullet" then
 			object.physics = true
 		elseif object.name == "pirate" then
-			pancake.changeAnimation(object, "idle")
+			if not pirate.dead then
+				pancake.changeAnimation(object, "idle")
+			end
 		end
 	end
 end
@@ -689,10 +895,12 @@ function pancake.onCollision(object1, object2, axis, direction, sc) --This funct
 		local explosion = pancake.addObject({name = "explosion", image = "explosion", x = object1.x - 4, y = object1.y - 4, width = 13, height = 13})
 		pancake.addTimer(100, "single", deleteObject, explosion)
 		pancake.trash(pancake.objects, object1.ID, "ID")
+		pancake.playSound("boom")
 	elseif object2.name == "barrel" and not alien.timeStopped then
 		local explosion = pancake.addObject({name = "explosion", image = "explosion", x = object2.x - 4, y = object2.y - 4, width = 13, height = 13})
 		pancake.addTimer(100, "single", deleteObject, explosion)
 		pancake.trash(pancake.objects, object2.ID, "ID")
+		pancake.playSound("boom")
 	elseif object2.name == "pirate" and not alien.timeStopped then
 		if axis == "x" then
 			object2.velocityY = 0
@@ -712,8 +920,19 @@ end
 
 
 function pancake.onLoad() -- This function will be called when pancake start up is done (after the animation)
-	pancake.pause = true
-	text = 0
+	splash = true
+	pancake.addTimer(1000, "single", changeTextVisibility)
+	pressVisible = false
+	text = nil
+end
+
+function changeTextVisibility()
+	pressVisible = not pressVisible
+	if not menu then
+		pancake.addTimer(1000, "single", changeTextVisibility)
+	else
+		pressVisible = false
+	end
 end
 
 function damageShip()
@@ -772,7 +991,6 @@ function pancake.onOverlap(object1, object2, dt) -- This function will be called
 			text = 4
 			if chapter1 then
 				chapter1:pause()
-				chapter1 = nil
 			end
 			pancake.paused = true
 		elseif object1.name == "ship" and object2.name == "ground" then
@@ -814,7 +1032,6 @@ function pancake.onOverlap(object1, object2, dt) -- This function will be called
 				pancake.paused = true
 				if chapter4 then
 					chapter4:pause()
-					chapter4 = nil
 				end
 			end
 		end
@@ -855,14 +1072,12 @@ function pancake.onOverlap(object1, object2, dt) -- This function will be called
 				text = 10
 				if chapter2 then
 					chapter2:pause()
-					chapter2 = nil
 				end
 			elseif level == 3 and alien.recipe and text == nil then
 				pancake.paused = true
 				text = 13
 				if chapter3 then
 					chapter3:pause()
-					chapter3 = nil
 				end
 			end
 		elseif object1.name == "alien" and object2.name == "astronaut" then
@@ -908,23 +1123,30 @@ function pancake.onOverlap(object1, object2, dt) -- This function will be called
 		elseif object1.name == "alien" and object2.name == "red_laser" and not alien.timeStopped then
 			killAlien()
 		elseif object1.name == "alien" and object2.name == "pirate" and not alien.timeStopped then
-			alien.velocityX = -13
-			alien.x = pirate.x - 7
-			alien.y = pirate.y
-			pancake.applyPhysics(pirate)
-			pirate.velocityX = -7
-			pirate.velocityY = -70
-			pirate.colliding = true
-			pirate.waiting = false
-			for i = 1, #boxes do
-				pancake.trash(pancake.objects, boxes[i].ID, "ID")
-			end
-			pancake.addTimer(3000, "single", pirateMeeleAttack)
-			for i = 1, #pancake.objects do
-				local object = pancake.objects[i]
-				if object.name == "barrel" then
-					pancake.trash(pancake.objects, object.ID, "ID")
+			if pirate.waiting then
+				alien.velocityX = -13
+				alien.x = pirate.x - 7
+				alien.y = pirate.y
+				pancake.applyPhysics(pirate)
+				pirate.velocityX = -7
+				pirate.velocityY = -70
+				pirate.colliding = true
+				pirate.waiting = false
+				for i = 1, #boxes do
+					pancake.trash(pancake.objects, boxes[i].ID, "ID")
 				end
+				pancake.addTimer(3000, "single", pirateMeeleAttack)
+				for i = 1, #pancake.objects do
+					local object = pancake.objects[i]
+					if object.name == "barrel" then
+						pancake.trash(pancake.objects, object.ID, "ID")
+					end
+				end
+			else
+				text = 17
+				pancake.paused = true
+				chaptersCleared = 5
+				pancake.save(chaptersCleared, "chaptersCleared")
 			end
 		elseif object1.name == "bullet" and not alien.timeStopped and object2.name ~= "pirate" then
 			if object2.name == "alien" then
@@ -944,6 +1166,11 @@ function pancake.onOverlap(object1, object2, dt) -- This function will be called
 			end
 		elseif object1.name == "explosion" and object2.name == "alien" then
 			damageAlien()
+		elseif object1.name == "alien" and object2.name == "easter_egg" then
+			pancake.trash(pancake.objects, object2.ID, "ID")
+			pancake.playSound("success")
+			easterEgg = "YES!"
+			pancake.save(easterEgg, "easterEgg")
 		end
 	end
 end
@@ -1058,13 +1285,171 @@ function love.draw()
 	end
 	drawText()
 	love.graphics.setColor(1, 1, 1, 1)
-	--pancake.print("AaBbCcDdEeFfGgHhIiJjKkLl",0,0,scale)
-	--pancake.print("MmNnOoPpRrSsTtUuVvWwXxYyZz123467890!.",0, 7*scale,scale)
 	if pancake.debugMode then
 		love.graphics.setColor(1, 1, 1, 1)
 		pancake.print(love.timer.getFPS(),0,0,2*scale)
 		pancake.print("lv"..level,0,7*2*scale,2*scale)
-		pancake.print(pancake.window.offsetY,0,14*2*scale,scale)
+		pancake.print(chaptersCleared,0,14*2*scale,scale)
+	end
+	if splash then
+		love.graphics.setColor(1, 1, 1, 1)
+		love.graphics.draw(pancake.images.splash, x, y, 0, scale)
+		if pressVisible and not menu then
+			pancake.print("Press J to start", x + 22*scale, y + 87*scale, scale)
+		end
+		if menu then
+			pancake.print(chaptersCleared .. "/5", x+1*scale, y+40*scale, scale)
+			if easterEgg then
+				love.graphics.draw(pancake.images.easter_egg, x+20*scale, y+35*scale, 0 ,scale)
+			end
+			pancake.print("Best time:", x+1*scale, y+50*scale ,scale)
+			if bestTime then
+				local shownMs
+				if string.sub(bestTime.ms, 3, 3) == "." then
+					shownMs = string.sub(bestTime.ms, 1, 2)
+				else
+					shownMs = string.sub(bestTime.ms, 1, 3)
+				end
+				pancake.print(bestTime.m - pancake.boolConversion(easterEgg, 5, 0) .. "." .. bestTime.s .. "." .. shownMs, x+1*scale, y + 57*scale, scale)
+			else
+				pancake.print("--.--.---", x+1*scale, y+57*scale ,scale)
+			end
+			love.graphics.setColor(1, 1, 1, 1)
+			if option == 1 then
+				love.graphics.setColor(0.2, 0.8, 0.2, 1)
+			end
+			if not continueOption then
+				love.graphics.setColor(0.3, 0.3, 0.3, 1)
+			end
+			pancake.print("CONTINUE", x + 39*scale, y + 43*scale, scale)
+			love.graphics.setColor(1, 1, 1, 1)
+			if option == 2 then
+				love.graphics.setColor(0.2, 0.8, 0.2, 1)
+			end
+			pancake.print("NEW GAME", x + 39*scale, y + 53*scale, scale)
+			love.graphics.setColor(1, 1, 1, 1)
+			if option == 3 then
+				love.graphics.setColor(0.2, 0.8, 0.2, 1)
+			end
+			pancake.print("CHAPTERS", x + 39*scale, y + 63*scale, scale)
+			love.graphics.setColor(1, 1, 1, 1)
+			if option == 4 then
+				love.graphics.setColor(0.2, 0.8, 0.2, 1)
+			end
+			pancake.print("OPTIONS", x + 39*scale, y + 73*scale, scale)
+			love.graphics.setColor(1, 1, 1, 1)
+			if option == 5 then
+				love.graphics.setColor(0.2, 0.8, 0.2, 1)
+			end
+			pancake.print("CREDITS", x + 39*scale, y + 83*scale, scale)
+		elseif chooseChapter then
+			if option == 1 then
+				love.graphics.setColor(0.2, 0.8, 0.2, 1)
+			end
+			pancake.print("CHAPTER 1", x + 39*scale, y + 38*scale, scale)
+			love.graphics.setColor(1, 1, 1, 1)
+			if option == 2 then
+				love.graphics.setColor(0.2, 0.8, 0.2, 1)
+			end
+			if chaptersCleared == 0 then
+				love.graphics.setColor(0.3, 0.3, 0.3, 1)
+			end
+			pancake.print("CHAPTER 2", x + 39*scale, y + 48*scale, scale)
+			love.graphics.setColor(1, 1, 1, 1)
+			if option == 3 then
+				love.graphics.setColor(0.2, 0.8, 0.2, 1)
+			end
+			if chaptersCleared == 0 or chaptersCleared == 1 then
+				love.graphics.setColor(0.3, 0.3, 0.3, 1)
+			end
+			pancake.print("CHAPTER 3", x + 39*scale, y + 58*scale, scale)
+			love.graphics.setColor(1, 1, 1, 1)
+			if option == 4 then
+				love.graphics.setColor(0.2, 0.8, 0.2, 1)
+			end
+			if chaptersCleared == 0 or chaptersCleared == 1 or chaptersCleared == 2 then
+				love.graphics.setColor(0.3, 0.3, 0.3, 1)
+			end
+			pancake.print("CHAPTER 4", x + 39*scale, y + 68*scale, scale)
+			love.graphics.setColor(1, 1, 1, 1)
+			if option == 5 then
+				love.graphics.setColor(0.2, 0.8, 0.2, 1)
+			end
+			if chaptersCleared == 0 or chaptersCleared == 1 or chaptersCleared == 2 or chaptersCleared == 3 then
+				love.graphics.setColor(0.3, 0.3, 0.3, 1)
+			end
+			pancake.print("CHAPTER 5", x + 39*scale, y + 78*scale, scale)
+			love.graphics.setColor(1, 1, 1, 1)
+			if option == 6 then
+				love.graphics.setColor(0.2, 0.8, 0.2, 1)
+			end
+			pancake.print("BACK", x + 39*scale, y + 88*scale, scale)
+		end
+	elseif credits then
+		love.graphics.draw(pancake.images.title, x, y, 0, scale)
+		love.graphics.setColor(0.5, 0.5, 0.5, 1)
+		pancake.print("a game by", x + 30*scale, y + 34*scale, scale)
+		love.graphics.setColor(0.2, 0.7, 0.2, 1)
+		pancake.print("MightyPancake", x + 21*scale, y + 41*scale, scale)
+		love.graphics.setColor(0.5, 0.5, 0.5, 1)
+		pancake.print("music by", x + 8*scale, y + 51*scale, scale)
+		love.graphics.setColor(0.7, 0.2, 0.2, 1)
+		pancake.print("John Gray", x + 6*scale, y + 58*scale, scale)
+		love.graphics.setColor(0.5, 0.5, 0.5, 1)
+		pancake.print("splash by", x + 53*scale, y + 51*scale, scale)
+		love.graphics.setColor(0.7, 0.7, 0.2, 1)
+		pancake.print("matharoo", x + 54*scale, y + 58*scale, scale)
+		love.graphics.setColor(0.5, 0.5, 0.5, 1)
+		pancake.print("special thanks to", x + 18*scale, y + 66*scale, scale)
+		love.graphics.setColor(1, 0.6, 0.6, 1)
+		pancake.print("Igorencjo", x + 8*scale, y + 75*scale, scale)
+		love.graphics.setColor(0.8, 0.4, 0.1, 1)
+		pancake.print("Jasiu", x + 35*scale, y + 81*scale, scale)
+		love.graphics.setColor(0.3, 0.5, 0.8, 1)
+		pancake.print("Nobody6502", x + 48*scale, y + 74*scale, scale)
+		love.graphics.setColor(0.7,0.7,0.7,1)
+		pancake.print("And you! The player!", x + 13*scale, y + 88*scale, scale)
+	end
+	if options then
+		love.graphics.setColor(1, 1, 1, 1)
+		love.graphics.rectangle("fill", x + 13*scale, y + 13*scale, 70*scale, 70*scale)
+		love.graphics.setColor(0, 0, 0, 1)
+		love.graphics.rectangle("fill", x + 15*scale, y + 15*scale, 66*scale, 66*scale)
+		love.graphics.setColor(1, 1, 1, 1)
+		if option == 1 then
+			love.graphics.setColor(0.2, 0.8, 0.2, 1)
+		end
+		if splash then
+			pancake.print("BACK", x + 39*scale, y + 20*scale, scale)
+		else
+			pancake.print("RESUME", x + 39*scale, y + 20*scale, scale)
+		end
+		love.graphics.setColor(1, 1, 1, 1)
+		if option == 2 then
+			love.graphics.setColor(0.2, 0.8, 0.2, 1)
+		end
+		pancake.print("TIMER: " .. pancake.boolConversion(displayTimer, "ON", "OFF"), x + 30*scale, y + 37*scale, scale)
+		love.graphics.setColor(1, 1, 1, 1)
+		if option == 3 then
+			love.graphics.setColor(0.2, 0.8, 0.2, 1)
+		end
+		pancake.print("MUSIC: " .. pancake.boolConversion(music, "ON", "OFF"), x + 30*scale, y + 54*scale, scale)
+		love.graphics.setColor(1, 1, 1, 1)
+		if option == 4 then
+			love.graphics.setColor(0.2, 0.8, 0.2, 1)
+		end
+		pancake.print("SFX: " .. pancake.boolConversion(sfx, "ON", "OFF"), x + 33*scale, y + 71*scale, scale)
+		love.graphics.setColor(1, 1, 1, 1)
+	end
+	if displayTimer and not splash and text == nil and not credits then
+		love.graphics.setColor(1, 1, 1, 1)
+		local shownMs
+		if string.sub(timer.ms, 3, 3) == "." then
+			shownMs = string.sub(timer.ms, 1, 2)
+		else
+			shownMs = string.sub(timer.ms, 1, 3)
+		end
+		pancake.print(timer.m .. "." .. timer.s .. "." .. shownMs,0,0,scale)
 	end
 end
 
@@ -1224,133 +1609,175 @@ function drawText()
 			pancake.print("by a space pirate!", x+16*scale, y + 57*scale, scale)
 		elseif text == 16 then
 			pancake.print("Chapter 5", x+16*scale, y + 26*scale, scale*2)
-			pancake.print("Just let me go", x+23*scale, y + 50*scale, scale)
+			pancake.print("Why do I hear boss music?", x+6*scale, y + 50*scale, scale)
+		elseif text == 17 then
+			love.graphics.setColor(0.8, 0.8, 0.2, 1)
+			pancake.print("Congratulations!", x+16*scale, y + 10*scale, scale)
+			love.graphics.setColor(1, 1, 1, 1)
+			pancake.print("You won the game in:", x+14*scale, y + 30*scale, scale)
+			local shownMs
+			if string.sub(timer.ms, 3, 3) == "." then
+				shownMs = string.sub(timer.ms, 1, 2)
+			else
+				shownMs = string.sub(timer.ms, 1, 3)
+			end
+			pancake.print(timer.m - pancake.boolConversion(easterEgg, 5, 0) .. " minutes " .. timer.s .. "." .. shownMs .." seconds!", x+8*scale, y + 37*scale, scale)
+			pancake.print("Starting from chapter " .. startingFromLevel .. "!", x+6*scale, y + 44*scale, scale)
+			if easterEgg then
+				pancake.print("The power of easter egg ", x+6*scale, y + 64*scale, scale)
+				pancake.print("decreases time by", x+18*scale, y + 71*scale, scale)
+				pancake.print("5 minutes!", x+28*scale, y + 78*scale, scale)
+			end
 		end
 	end
 end
 
 function love.update(dt)
 	pancake.update(dt) --Passing time between frames to pancake!
-	if levelType == "ship" then
-		pancake.window.offsetY = 0 --So that our ship is followed only on x coordinate!
-		pancake.window.offsetX = pancake.window.offsetX + 24
-		if level == 4 then
-			cow.x = farmer.x + 18
-			cow.y = farmer.y + 1
-			if ship.x < farmer.x - 55 then
-				ship.x = farmer.x - 55
-				if ship.velocityX < 35 then
+	if level == 5 then
+		pancake.window.offsetX = 0
+	end
+	if level and chaptersCleared then
+		if level > chaptersCleared + 1 then
+			chaptersCleared = level - 1
+			pancake.save(chaptersCleared, "chaptersCleared")
+		end
+	end
+	if not pancake.paused then
+		timer.ms = timer.ms + dt*1000
+		if timer.ms >= 1000 then
+			timer.ms = timer.ms - 1000
+			timer.s = timer.s + 1
+			if timer.s >= 60 then
+				timer.s = timer.s - 60
+				timer.m = timer.m + 1
+			end
+		end
+		if levelType == "ship" then
+			pancake.window.offsetY = 0 --So that our ship is followed only on x coordinate!
+			pancake.window.offsetX = pancake.window.offsetX + 24
+			if level == 4 then
+				cow.x = farmer.x + 18
+				cow.y = farmer.y + 1
+				if ship.x < farmer.x - 55 then
+					ship.x = farmer.x - 55
+					if ship.velocityX < 35 then
+						ship.velocityX = 35
+					end
+				elseif ship.x > farmer.x + 30 then
+					ship.x = farmer.x + 30
 					ship.velocityX = 35
 				end
-			elseif ship.x > farmer.x + 30 then
-				ship.x = farmer.x + 30
-				ship.velocityX = 35
-			end
-			pancake.window.offsetX = pancake.window.offsetX - 30
-			for i = 2, #pancake.objects do
-				local object = pancake.objects[i]
-				if object.x + object.width + 1 < farmer.x - 50 then
-						pancake.trash(pancake.objects, object.ID, "ID")
-				end
-			end
-			if farmer.x > 1800 then
-				for i = 1, #pancake.objects do
+				pancake.window.offsetX = pancake.window.offsetX - 30
+				for i = 2, #pancake.objects do
 					local object = pancake.objects[i]
-					if object.name ~= "ground" then
-						object.x = object.x - 1500
-					end
-					if object.name == "fuel" or object.name == "tree" and object.name == "apple" then
-						pancake.trash(pancake.objects, object.ID, "ID")
+					if object.x + object.width + 1 < farmer.x - 50 then
+							pancake.trash(pancake.objects, object.ID, "ID")
 					end
 				end
-				generateTrees()
-				generateFuel()
+				if farmer.x > 1800 then
+					for i = 1, #pancake.objects do
+						local object = pancake.objects[i]
+						if object.name ~= "ground" then
+							object.x = object.x - 1500
+						end
+						if object.name == "fuel" or object.name == "tree" and object.name == "apple" then
+							pancake.trash(pancake.objects, object.ID, "ID")
+						end
+					end
+					generateTrees()
+					generateFuel()
+				end
 			end
-		end
-		if pancake.isButtonClicked(left) and not ship.dead and ship.fuel > 0 then
-			pancake.applyForce(ship, {x = -40, relativeToMass = true})
-			ship.flippedX = true
-		end
-		if pancake.isButtonClicked(right) and not ship.dead and ship.fuel > 0  then
-			pancake.applyForce(ship, {x = 40, relativeToMass = true})
-			ship.flippedX = false
-		end
-		if pancake.isButtonClicked(up) and not ship.dead and ship.fuel > 0  then
-			pancake.applyForce(ship, {y = -40, relativeToMass = true})
-		end
-		if pancake.isButtonClicked(down) and not ship.dead and ship.fuel > 0  then
-			pancake.applyForce(ship, {y = 40, relativeToMass = true})
-		end
-		if ship.y < 2 then
-			ship.y = 2
-			ship.velocityY = 0
-		elseif ship.y > 86 then
-			ship.y = 86
-			ship.velocityY = 0
-		end
-		if ship.x < 0 then
-			ship.x = 0
-			ship.velocityX = 0
-		elseif ship.x > 2020 then
-			ship.x = 2020
-			ship.velocityX = 0
-		end
+			if pancake.isButtonClicked(left) and not ship.dead and ship.fuel > 0 then
+				pancake.applyForce(ship, {x = -40, relativeToMass = true})
+				ship.flippedX = true
+			end
+			if pancake.isButtonClicked(right) and not ship.dead and ship.fuel > 0  then
+				pancake.applyForce(ship, {x = 40, relativeToMass = true})
+				ship.flippedX = false
+			end
+			if pancake.isButtonClicked(up) and not ship.dead and ship.fuel > 0  then
+				pancake.applyForce(ship, {y = -40, relativeToMass = true})
+			end
+			if pancake.isButtonClicked(down) and not ship.dead and ship.fuel > 0  then
+				pancake.applyForce(ship, {y = 40, relativeToMass = true})
+			end
+			if ship.y < 2 then
+				ship.y = 2
+				ship.velocityY = 0
+			elseif ship.y > 86 then
+				ship.y = 86
+				ship.velocityY = 0
+			end
+			if ship.x < 0 then
+				ship.x = 0
+				ship.velocityX = 0
+			elseif ship.x > 2020 then
+				ship.x = 2020
+				ship.velocityX = 0
+			end
 
-	--GROUND
-	elseif levelType == "ground" then
-		if level == 5 then
-			pancake.window.offsetX = 0
-		end
-		if pancake.isButtonClicked(left) then
-			if level == 5 then
-				pancake.applyForce(alien, {x = -200, relativeToMass = true})
-			else
-				pancake.applyForce(alien, {x = -70, relativeToMass = true})
-			end
-			alien.flippedX = true
-		end
-		if pancake.isButtonClicked(right) then
-			if level == 5 then
-				pancake.applyForce(alien, {x = 200, relativeToMass = true})
-			else
-				pancake.applyForce(alien, {x = 70, relativeToMass = true})
-			end
-			alien.flippedX = false
-		end
-		if pancake.isButtonClicked(up) and pancake.facing(alien).down then
-			if level == 5 then
-				pancake.applyForce(alien, {y = -74, relativeToMass = true},1)
-			else
-				pancake.applyForce(alien, {y = -32, relativeToMass = true},1)
-			end
-		end
-		if not pancake.facing(alien).down then
-			alien.image = pancake.animations.alien.run[1]
-		else
-			if pancake.isButtonClicked(right) or pancake.isButtonClicked(left) then
-				pancake.changeAnimation(alien, "run")
-			else
-				if alien.velocityX ~= 0 then
-					alien.image = pancake.animations.alien.idle[1]
+		--GROUND
+		elseif levelType == "ground" then
+			if pancake.isButtonClicked(down) then
+				if level == 5 then
+					pancake.applyForce(alien, {y = 200, relativeToMass = true})
 				else
-					pancake.changeAnimation(alien, "idle")
+					pancake.applyForce(alien, {y = 110, relativeToMass = true})
 				end
 			end
-		end
-		if alien.x < 0 and level == 2 then
-			alien.x = 0
-			alien.velocityX = 0
-		elseif alien.x > 0 and level == 3 then
-			alien.x = 0
-			alien.velocityX = 0
-		end
-		if (level == 3 or level == 5)then
-			if alien.timeStopped then
-				for i = 1, #pancake.objects do
-					if pancake.objects[i].name == "astronaut" then
-						pancake.objects[i].image = "astronaut_idle1"
-					elseif pancake.objects[i].name == "pirate" then
-						pancake.objects[i].image = "pirate_idle1"
+			if pancake.isButtonClicked(left) then
+				if level == 5 then
+					pancake.applyForce(alien, {x = -200, relativeToMass = true})
+				else
+					pancake.applyForce(alien, {x = -70, relativeToMass = true})
+				end
+				alien.flippedX = true
+			end
+			if pancake.isButtonClicked(right) then
+				if level == 5 then
+					pancake.applyForce(alien, {x = 200, relativeToMass = true})
+				else
+					pancake.applyForce(alien, {x = 70, relativeToMass = true})
+				end
+				alien.flippedX = false
+			end
+			if pancake.isButtonClicked(up) and pancake.facing(alien).down then
+				if level == 5 then
+					pancake.applyForce(alien, {y = -74, relativeToMass = true},1)
+				else
+					pancake.applyForce(alien, {y = -32, relativeToMass = true},1)
+				end
+			end
+			if not pancake.facing(alien).down then
+				alien.image = pancake.animations.alien.run[1]
+			else
+				if pancake.isButtonClicked(right) or pancake.isButtonClicked(left) then
+					pancake.changeAnimation(alien, "run")
+				else
+					if alien.velocityX ~= 0 then
+						alien.image = pancake.animations.alien.idle[1]
+					else
+						pancake.changeAnimation(alien, "idle")
+					end
+				end
+			end
+			if alien.x < 0 and level == 2 then
+				alien.x = 0
+				alien.velocityX = 0
+			elseif alien.x > 0 and level == 3 then
+				alien.x = 0
+				alien.velocityX = 0
+			end
+			if (level == 3 or level == 5)then
+				if alien.timeStopped then
+					for i = 1, #pancake.objects do
+						if pancake.objects[i].name == "astronaut" then
+							pancake.objects[i].image = "astronaut_idle1"
+						elseif pancake.objects[i].name == "pirate" and  pirate and not pirate.dead then
+							pancake.objects[i].image = "pirate_idle1"
+						end
 					end
 				end
 			end
@@ -1364,4 +1791,9 @@ end
 
 function love.keypressed(key)
 	pancake.keypressed(key)
+	if key == "escape" and text == nil and not splash then
+		options = not options
+		menu = false
+		pancake.paused = options
+	end
 end
