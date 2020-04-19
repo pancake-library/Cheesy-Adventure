@@ -183,6 +183,7 @@ function loadLevel(stage)
 		level = 3
 		pancake.physics.gravityY = 0.2*12*pancake.meter
 		loadGroundLevel()
+		alien.timerTimeLeft = 0
 		alien.safePlace = {x = -15, y = -10}
 		alien.timeStopper = true
 		alien.x = -15
@@ -263,6 +264,7 @@ function loadLevel(stage)
 		level = 5
 		pancake.physics.gravityY = 12*pancake.meter
 		loadGroundLevel()
+		alien.timerTimeLeft = 0
 		alien.timeStopper = true
 		alien.x = 40
 		alien.y = -30
@@ -284,7 +286,7 @@ function loadLevel(stage)
 		pirate = pancake.addObject({y = -211, x = 76, flippedX = true, name = "pirate", width = 8, height = 11, offsetX =-2})
 		pancake.changeAnimation(pirate, "idle")
 		pirate.waiting = true
-		pirate.lives = 1
+		pirate.lives = 7
 		pirate.invulnerable = false
 		alien.lives = 5
 	end
@@ -484,6 +486,7 @@ function loadAssets()
 	pancake.addImage("splash", "images")
 	pancake.addImage("button", "images")
 	pancake.addImage("title", "images")
+	pancake.addImage("time_stopper", "images")
 	--sounds
 	pancake.addSound("laser")
 	pancake.addSound("success")
@@ -543,6 +546,7 @@ function loadShipLevel()--level is a number of the level. This function loads ev
 	ship.maxVelocity = 100
 	ship.lives = 3
 	ship.fuel = 10
+	ship.laserTimeLeft = 0
 	ship.fuelTimer = pancake.addTimer(4000, "repetetive", decreaseFuel)
 	generateFuel()
 end
@@ -565,8 +569,15 @@ function decreaseFuel()
 	end
 end
 
+function decreaseTimeStopperTimeLeft()
+	alien.timerTimeLeft = alien.timerTimeLeft - 1
+	if alien.timerTimeLeft > 0 then
+		pancake.addTimer(145, "single", decreaseTimeStopperTimeLeft)
+	end
+end
+
 function centerPressed()
-	if levelType == "ship" and text == nil then
+	if levelType == "ship" and text == nil and not options then
 		shoot()
 		if ship.dead then
 			loadLevel(level)
@@ -584,7 +595,9 @@ function centerPressed()
 		pancake.playSound("timestop")
 		pancake.addTimer(1300, "single",createStartWave)
 		pancake.addTimer(2200+3000, "single",timerCooldown)
+		pancake.addTimer(2200, "single", decreaseTimeStopperTimeLeft)
 		alien.timeStopper = false
+		alien.timerTimeLeft = 20
 		for i = 1, #pancake.objects do
 			if pancake.objects[i].name ~= "alien" then
 				pancake.objects[i].physics = false
@@ -710,7 +723,21 @@ function centerPressed()
 			option = 4
 		elseif option == 1 then
 			options = false
+			chapter1:stop()
+			chapter2:stop()
+			chapter3:stop()
+			chapter4:stop()
+			chapter5:stop()
 			pancake.paused = false
+			pancake.objects = {}
+			pancake.timers = {}
+			splash = true
+			menu = true
+			levelType = "none"
+			timer = {}
+			timer.ms = 0
+			timer.s = 0
+			timer.m = 0
 		elseif option == 2 then
 			displayTimer = not displayTimer
 		elseif option == 3 then
@@ -770,7 +797,6 @@ function loadTextForLevel(stage)
 	splash = false
 	chooseChapter = false
 	startingFromLevel = stage
-	startingFromLevel = 1
 end
 
 function timerCooldown()
@@ -823,11 +849,20 @@ end
 
 function shoot()
 	if not ship.dead and not ship.laserTimer then
+		ship.laserTimeLeft = 20
 		local laser = pancake.applyPhysics(pancake.addObject({name = "laser", x = ship.x + pancake.boolConversion(ship.flippedX, 0, 10), y = ship.y+2, height = 3, width = 8, image = "laser"}))
 		pancake.applyForce(laser, {x = pancake.boolConversion(ship.flippedX, -1, 1)*200, relativeToMass = true}, 1)
 		pancake.addTimer(600,"single",deleteObject, laser)
 		pancake.playSound("laser")
 		ship.laserTimer = pancake.addTimer(2000,"single", resetLaserTimer)
+		pancake.addTimer(90,"single",decreaseLaserTimeLeft)
+	end
+end
+
+function decreaseLaserTimeLeft()
+	ship.laserTimeLeft = ship.laserTimeLeft - 1
+	if ship.laserTimeLeft > 0 then
+		pancake.addTimer(90,"single",decreaseLaserTimeLeft)
 	end
 end
 
@@ -1222,6 +1257,11 @@ function love.draw()
 	local scale = pancake.window.pixelSize
 	pancake.draw() --Sets the canvas right! If pancake.autoDraw is set to true (which is its default state) the canvas will be automatically drawn on the window x and y
 	if levelType == "ship" and text == nil then
+		love.graphics.setColor(0.2, 0.8, 0.2, 1)
+		if ship.laserTimeLeft > 0 then
+			love.graphics.rectangle("fill", x +36*scale, y+2*scale, ship.laserTimeLeft*scale, 3*scale)
+		end
+		love.graphics.setColor(1, 1, 1, 1)
 		if level == 4 then
 			if farmer.invulnerable then
 				for i = 1, 5 do
@@ -1254,6 +1294,17 @@ function love.draw()
 			pancake.print("to restart", x + 14*scale, y + 64*scale, 2*scale)
 		end
 	elseif levelType == "ground" and text == nil then
+		if level == 3 or level == 5 then
+			love.graphics.draw(pancake.images.time_stopper, x + 2*scale, y + 2*scale, 0, scale)
+			if alien.passcard then
+				love.graphics.draw(pancake.images.passcard, x + 2*scale, y +10*scale, 0, scale)
+			end
+			if alien.timerTimeLeft > 0 then
+				love.graphics.setColor(1, 0.2, 1, 1)
+				love.graphics.rectangle("fill", x + 10*scale, y + 4*scale, alien.timerTimeLeft*scale, 3*scale)
+				love.graphics.setColor(1, 1, 1, 1)
+			end
+		end
 		if level == 5 then
 			if alien.lives > 0 then
 				for i = 1, alien.lives do
@@ -1321,27 +1372,27 @@ function love.draw()
 			if not continueOption then
 				love.graphics.setColor(0.3, 0.3, 0.3, 1)
 			end
-			pancake.print("CONTINUE", x + 39*scale, y + 43*scale, scale)
+			pancake.print("CONTINUE", x + 49*scale, y + 43*scale, scale)
 			love.graphics.setColor(1, 1, 1, 1)
 			if option == 2 then
 				love.graphics.setColor(0.2, 0.8, 0.2, 1)
 			end
-			pancake.print("NEW GAME", x + 39*scale, y + 53*scale, scale)
+			pancake.print("NEW GAME", x + 49*scale, y + 53*scale, scale)
 			love.graphics.setColor(1, 1, 1, 1)
 			if option == 3 then
 				love.graphics.setColor(0.2, 0.8, 0.2, 1)
 			end
-			pancake.print("CHAPTERS", x + 39*scale, y + 63*scale, scale)
+			pancake.print("CHAPTERS", x + 49*scale, y + 63*scale, scale)
 			love.graphics.setColor(1, 1, 1, 1)
 			if option == 4 then
 				love.graphics.setColor(0.2, 0.8, 0.2, 1)
 			end
-			pancake.print("OPTIONS", x + 39*scale, y + 73*scale, scale)
+			pancake.print("OPTIONS", x + 50*scale, y + 73*scale, scale)
 			love.graphics.setColor(1, 1, 1, 1)
 			if option == 5 then
 				love.graphics.setColor(0.2, 0.8, 0.2, 1)
 			end
-			pancake.print("CREDITS", x + 39*scale, y + 83*scale, scale)
+			pancake.print("CREDITS", x + 51*scale, y + 83*scale, scale)
 		elseif chooseChapter then
 			if option == 1 then
 				love.graphics.setColor(0.2, 0.8, 0.2, 1)
@@ -1402,7 +1453,7 @@ function love.draw()
 		love.graphics.setColor(0.5, 0.5, 0.5, 1)
 		pancake.print("special thanks to", x + 18*scale, y + 66*scale, scale)
 		love.graphics.setColor(1, 0.6, 0.6, 1)
-		pancake.print("Igorencjo", x + 8*scale, y + 75*scale, scale)
+		pancake.print("Igorencjo", x + 8*scale, y + 74*scale, scale)
 		love.graphics.setColor(0.8, 0.4, 0.1, 1)
 		pancake.print("Jasiu", x + 35*scale, y + 81*scale, scale)
 		love.graphics.setColor(0.3, 0.5, 0.8, 1)
@@ -1422,7 +1473,7 @@ function love.draw()
 		if splash then
 			pancake.print("BACK", x + 39*scale, y + 20*scale, scale)
 		else
-			pancake.print("RESUME", x + 39*scale, y + 20*scale, scale)
+			pancake.print("EXIT", x + 41*scale, y + 20*scale, scale)
 		end
 		love.graphics.setColor(1, 1, 1, 1)
 		if option == 2 then
