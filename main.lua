@@ -268,8 +268,6 @@ function loadLevel(stage)
 		alien.timeStopper = true
 		alien.x = 40
 		alien.y = -30
-		alien.x = 76
-		alien.y = -200
 		rectangle(-8,0, 12, 6, "steel")
 		rectangle(-8,-800, 1, 100, "steel")
 		rectangle(80,-800, 1, 100, "steel")
@@ -1132,8 +1130,14 @@ function pancake.onOverlap(object1, object2, dt) -- This function will be called
 			pancake.playSound("next")
 			alien.passcard = false
 		elseif object1.name == "alien" and object2.name == "button3" then
+			if not alien.button3 then
+				pancake.playSound("button")
+			end
 			alien.button3 = true
 		elseif object1.name == "alien" and object2.name == "button1" then
+			if not alien.button1 then
+				pancake.playSound("button")
+			end
 			if alien.button3 then
 				alien.button1 = true
 			else
@@ -1141,7 +1145,14 @@ function pancake.onOverlap(object1, object2, dt) -- This function will be called
 				killAlien()
 			end
 		elseif object1.name == "alien" and object2.name == "button2" then
+			if not alien.button2 then
+				pancake.playSound("button")
+			end
 			if alien.button3 and alien.button1 then
+				if not alien.button3 then
+					pancake.playSound("button")
+					pancake.playSound("next")
+				end
 				alien.button2 = true
 				pancake.trash(pancake.objects, "closed_door2", "name")
 			else
@@ -1259,7 +1270,7 @@ function love.draw()
 	if levelType == "ship" and text == nil then
 		love.graphics.setColor(0.2, 0.8, 0.2, 1)
 		if ship.laserTimeLeft > 0 then
-			love.graphics.rectangle("fill", x +36*scale, y+2*scale, ship.laserTimeLeft*scale, 3*scale)
+			love.graphics.rectangle("fill", x +20*scale, y+2*scale, ship.laserTimeLeft*scale, 3*scale)
 		end
 		love.graphics.setColor(1, 1, 1, 1)
 		if level == 4 then
@@ -1604,7 +1615,7 @@ function drawText()
 		elseif text == 8 then
 			love.graphics.draw(pancake.images.page, x, y, 0, scale)
 			love.graphics.setColor(0.4, 0.3, 0.2, 1)
-			pancake.print("I am about starve to death. ", x+0*scale, y + 2*scale, scale)
+			pancake.print("I am starving to death. ", x+4*scale, y + 2*scale, scale)
 			pancake.print("Funny, considering I am on", x+3*scale, y + 9*scale, scale)
 			pancake.print("something that is huge and", x+2*scale, y + 16*scale, scale)
 			pancake.print("was suppose to be food... I", x+3*scale, y + 23*scale, scale)
