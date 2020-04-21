@@ -1214,9 +1214,9 @@ function pancake.isButtonClicked(button)
 	local ret = false
 	if pancake.os == "Android" then
 		local touches = love.touch.getTouches()
-		if touches > 0 then
+		if #touches > 0 then
 			for i = 1, #touches do
-				local x, y = love.touch.getPosition(i)
+				local x, y = love.touch.getPosition(touches[i])
 				if (pancake.collisionCheck({x = x, y = y, width = 1, height = 1}, {x = button.x, y = button.y, width = button.width*button.scale, height = button.height*button.scale})) or love.keyboard.isDown(button.key) then
 					ret = true
 				end
