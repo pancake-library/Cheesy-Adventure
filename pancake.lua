@@ -63,6 +63,7 @@ function pancake.init (settings)
 	physics.energyLoss = physics.energyLoss or 0
 	pancake.physics = physics
 	--End of physics
+	pancake.os = love.system.getOS( )
 	pancake.lastdt = 0.001
 	pancake.smoothRender = settings.smoothRender or false
 	pancake.target = nil
@@ -1211,8 +1212,20 @@ end
 
 function pancake.isButtonClicked(button)
 	local ret = false
-	if (love.mouse.isDown(1) and pancake.collisionCheck({x = love.mouse.getX(), y = love.mouse.getY(), width = 1, height = 1}, {x = button.x, y = button.y, width = button.width*button.scale, height = button.height*button.scale})) or love.keyboard.isDown(button.key) then
-		ret = true
+	if pancake.os == "Android" then
+		local touches = love.touch.getTouches()
+		if touches > 0 then
+			for i = 1, #touches do
+				local x, y = love.touch.getPosition(i)
+				if (pancake.collisionCheck({x = x, y = y, width = 1, height = 1}, {x = button.x, y = button.y, width = button.width*button.scale, height = button.height*button.scale})) or love.keyboard.isDown(button.key) then
+					ret = true
+				end
+			end
+		end
+	else
+		if (love.mouse.isDown(1) and pancake.collisionCheck({x = love.mouse.getX(), y = love.mouse.getY(), width = 1, height = 1}, {x = button.x, y = button.y, width = button.width*button.scale, height = button.height*button.scale})) or love.keyboard.isDown(button.key) then
+			ret = true
+		end
 	end
 	return ret
 end

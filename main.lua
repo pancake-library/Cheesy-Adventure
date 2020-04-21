@@ -55,6 +55,7 @@ function compareTimes(time1, time2)
 	else
 		ret = time2
 	end
+	return ret
 end
 
 function downPressed()
@@ -258,7 +259,7 @@ function loadLevel(stage)
 		cow = pancake.addObject({name = "cow", image = "cow", x = 0, y = 0, width = 16, height = 10})
 		pancake.changeAnimation(cow, "run")
 		theBird = pancake.applyPhysics(pancake.addObject({name = "bird", y = 20, x = 100, width = 7, height = 5}))
-		theApple = pancake.applyPhysics(pancake.addObject({image = "apple", name = "apple", y = 22, x = 103, width = 2, height = 2}))
+		theApple = pancake.applyPhysics(pancake.addObject({image = "apple", name = "apple", y = 25, x = 105, width = 2, height = 2}))
 		pancake.changeAnimation(theBird, "fly")
 		theBird.velocityX = -30
 		theApple.velocityX = -30
@@ -592,7 +593,7 @@ function decreaseTimeStopperTimeLeft()
 end
 
 function centerPressed()
-	if levelType == "ship" and text == nil and not options then
+	if levelType == "ship" and text == nil and not options and not splash and not credits then
 		shoot()
 		if ship.dead then
 			loadLevel(level)
@@ -601,7 +602,7 @@ function centerPressed()
 				pancake.paused = false
 			end
 		end
-	elseif (level == 3 or level == 5) and alien and not alien.timeStopped and text == nil and alien.timeStopper and alien.lives ~= 0 and not options then
+	elseif (level == 3 or level == 5) and alien and not alien.timeStopped and text == nil and alien.timeStopper and alien.lives ~= 0 and not options and not splash and not credits then
 		alien.timeStopped = true
 		local timeWave = pancake.addObject({name = "timewave",x = alien.x-6, y = alien.y-7,width = 10, height = 10})
 		pancake.changeAnimation(timeWave, "idle")
@@ -747,6 +748,7 @@ function centerPressed()
 			pancake.objects = {}
 			pancake.timers = {}
 			splash = true
+			level = 0
 			menu = true
 			levelType = "none"
 			timer = {}
@@ -1736,6 +1738,13 @@ function love.update(dt)
 	if level == 5 then
 		pancake.window.offsetX = 0
 	end
+	if levelType == "ship" and level == 1 or level == 4 then
+		pancake.window.offsetY = 0 --So that our ship is followed only on x coordinate!
+		pancake.window.offsetX = pancake.window.offsetX + 24
+		if level == 4 then
+			pancake.window.offsetX = pancake.window.offsetX - 30
+		end
+	end
 	if level and chaptersCleared then
 		if level > chaptersCleared + 1 then
 			chaptersCleared = level - 1
@@ -1753,8 +1762,6 @@ function love.update(dt)
 			end
 		end
 		if levelType == "ship" then
-			pancake.window.offsetY = 0 --So that our ship is followed only on x coordinate!
-			pancake.window.offsetX = pancake.window.offsetX + 24
 			if level == 4 then
 				cow.x = farmer.x + 18
 				cow.y = farmer.y + 1
@@ -1767,7 +1774,6 @@ function love.update(dt)
 					ship.x = farmer.x + 30
 					ship.velocityX = 35
 				end
-				pancake.window.offsetX = pancake.window.offsetX - 30
 				for i = 2, #pancake.objects do
 					local object = pancake.objects[i]
 					if object.x + object.width + 1 < farmer.x - 50 then
@@ -1789,17 +1795,29 @@ function love.update(dt)
 				end
 			end
 			if pancake.isButtonClicked(left) and not ship.dead and ship.fuel > 0 then
+				if ship.velocityX > 0 then
+					pancake.applyForce(ship, {x = -80, relativeToMass = true})
+				end
 				pancake.applyForce(ship, {x = -40, relativeToMass = true})
 				ship.flippedX = true
 			end
 			if pancake.isButtonClicked(right) and not ship.dead and ship.fuel > 0  then
+				if ship.velocityX < 0 then
+					pancake.applyForce(ship, {x = 80, relativeToMass = true})
+				end
 				pancake.applyForce(ship, {x = 40, relativeToMass = true})
 				ship.flippedX = false
 			end
 			if pancake.isButtonClicked(up) and not ship.dead and ship.fuel > 0  then
+				if ship.velocityY > 0 then
+					pancake.applyForce(ship, {y = -80, relativeToMass = true})
+				end
 				pancake.applyForce(ship, {y = -40, relativeToMass = true})
 			end
 			if pancake.isButtonClicked(down) and not ship.dead and ship.fuel > 0  then
+				if ship.velocityX < 0 then
+					pancake.applyForce(ship, {y = 80, relativeToMass = true})
+				end
 				pancake.applyForce(ship, {y = 40, relativeToMass = true})
 			end
 			if ship.y < 2 then
@@ -1851,7 +1869,9 @@ function love.update(dt)
 			end
 			if not pancake.facing(alien).down then
 				alien.image = pancake.animations.alien.run[1]
+				alien.offsetY = -4
 			else
+				alien.offsetY = -5
 				if pancake.isButtonClicked(right) or pancake.isButtonClicked(left) then
 					pancake.changeAnimation(alien, "run")
 				else
@@ -1891,6 +1911,7 @@ end
 function love.keypressed(key)
 	pancake.keypressed(key)
 	if key == "escape" and text == nil and not splash then
+		option = 2
 		options = not options
 		menu = false
 		pancake.paused = options
