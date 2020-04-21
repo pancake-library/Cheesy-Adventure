@@ -24,7 +24,7 @@ function love.load()
 	--pancake.loadAnimation = nil
 	pancake.paused = true
 	pancake.smoothRender = true
-	pancake.debugMode = true
+	--pancake.debugMode = true
 	timer = {}
 	timer.ms = 0
 	timer.s = 0
@@ -983,6 +983,13 @@ function pancake.onLoad() -- This function will be called when pancake start up 
 	pancake.addTimer(1000, "single", changeTextVisibility)
 	pressVisible = false
 	text = nil
+	pancake.buttons = {}
+	pancake.window.pixelSize = love.graphics.getHeight()/96
+	left = pancake.addButton({key = "a", name="left",x = 1*pancake.window.pixelSize, y = love.graphics.getHeight()-16*pancake.window.pixelSize, width = 14, height = 14, scale = pancake.window.pixelSize})
+	right = pancake.addButton({key = "d", name="right",x = 17*pancake.window.pixelSize, y = love.graphics.getHeight()-16*pancake.window.pixelSize, width = 14, height = 14, scale = pancake.window.pixelSize})
+	up = pancake.addButton({func = upPressed, key = "w", name="up",x = love.graphics.getWidth()-15*pancake.window.pixelSize, y = love.graphics.getHeight()-16*pancake.window.pixelSize, width = 14, height = 14, scale = pancake.window.pixelSize})
+	down = pancake.addButton({func = downPressed, key = "s", name="down",x = love.graphics.getWidth()-31*pancake.window.pixelSize, y = love.graphics.getHeight()-16*pancake.window.pixelSize, width = 14, height = 14, scale = pancake.window.pixelSize})
+	center = pancake.addButton({func = centerPressed, key = "j", name="center",x = love.graphics.getWidth()-15*pancake.window.pixelSize, y = love.graphics.getHeight()-31*pancake.window.pixelSize, width = 14, height = 14, scale = pancake.window.pixelSize})
 end
 
 function changeTextVisibility()

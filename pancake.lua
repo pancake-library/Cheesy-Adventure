@@ -35,6 +35,7 @@ function pancake.init (settings)
 	--Setting window...
 	local window = settings.window or {}
 	window.pixelSize = window.pixelSize or 5
+	pancake.lastPixelSize = window.pixelSize
 	local pixelSize = window.pixelSize
 	window.width = window.width or 64
 	window.height = window.height or window.width
@@ -468,6 +469,10 @@ end
 -------------------------
 function pancake.update(dt)
 	--Handle load animation
+	if pancake.window.pixelSize ~= pancake.lastPixelSize then
+		pancake.canvas = love.graphics.newCanvas(pancake.window.width*pancake.window.pixelSize, pancake.window.height*pancake.window.pixelSize)
+	end
+	pancake.lastPixelSize = pancake.window.pixelSize
 	if pancake.loadAnimation then
 		updateLoadAnimation(dt)
 	end
