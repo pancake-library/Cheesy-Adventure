@@ -24,7 +24,7 @@ function love.load()
 	--pancake.loadAnimation = nil
 	pancake.paused = true
 	pancake.smoothRender = true
-	--pancake.debugMode = true
+	pancake.debugMode = true
 	timer = {}
 	timer.ms = 0
 	timer.s = 0
@@ -112,10 +112,13 @@ function loadLevel(stage)
 		pancake.addObject({image = "earth", x = 1990, y = 43, width = 10, height = 10, layer = 2, name = "earth"})
 		pancake.paused = true
 		text = 0
-		for w = 2, 100 do
-			for i = 1, 5 do
-				pancake.applyForce(createAsteroid(math.random(w*25,w*25+25), math.random(0,80), math.random(1,2)),{x=-math.random(0,7), y = math.random(-4,4), relativeToMass = true},1)
-			end
+		--for w = 2, 4 do
+			--for i = 1, 5 do
+				--pancake.applyForce(createAsteroid(math.random(w*25,w*25+25), math.random(0,80), math.random(1,2)),{x=-math.random(0,7), y = math.random(-4,4), relativeToMass = true},1)
+		--	end
+	--	end
+		for w = 0, 20 do
+			pancake.addObject({name = "asteroid_generator", x = 50 + w*100, y = 0, width = 2, height = 96})
 		end
 	elseif level == 2 then
 		level = 2
@@ -1033,6 +1036,13 @@ function pancake.onOverlap(object1, object2, dt) -- This function will be called
 	if levelType == "ship" then
 		if object1.name == "ship" and object2.name == "asteroid" then
 			damageShip()
+		elseif object1.name == "ship" and object2.name == "asteroid_generator" then
+			pancake.trash(pancake.objects, object2.ID, "ID")
+			for y = 1, 2 do
+				for x = 1, 5 do
+					pancake.applyForce(createAsteroid(object2.x + 70 + x*20, math.random(0, 70), math.random(1,2)), {x=-math.random(0,7), y = math.random(-4,4), relativeToMass = true},1)
+				end
+			end
 		elseif object1.name == "laser" and object2.name == "asteroid" then
 			pancake.trash(pancake.objects, object1.ID, "ID")
 			pancake.trash(pancake.objects, object2.ID, "ID")
@@ -1743,6 +1753,14 @@ function love.update(dt)
 		pancake.window.offsetX = pancake.window.offsetX + 24
 		if level == 4 then
 			pancake.window.offsetX = pancake.window.offsetX - 30
+		end
+		if level == 1 then
+			for i = 1, #pancake.objects do
+				local object = pancake.objects[i]
+				if object.x + object.width + 50 <= ship.x then
+					pancake.trash(pancake.objects, object.ID, "ID")
+				end
+			end
 		end
 	end
 	if level and chaptersCleared then
